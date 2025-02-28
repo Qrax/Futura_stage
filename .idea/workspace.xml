@@ -4,15 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="Sensor wordt nu correct uitgelezen met code! Moet de code wel via CMD runnen..">
-      <change afterPath="$PROJECT_DIR$/PvA/making_plots.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PvA/ultrasonic-plots.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TUSS4440/fourier-analysis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TUSS4440/new.py" afterDir="false" />
+    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="Gewerkt aan plots die in het PvA komen.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_DC_values.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tuss44x0-controller.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PvA/making_plots.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PvA/making_plots.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +102,7 @@
       <workItem from="1740558680693" duration="134000" />
       <workItem from="1740564438792" duration="631000" />
       <workItem from="1740573445215" duration="1399000" />
-      <workItem from="1740739356869" duration="12259000" />
+      <workItem from="1740739356869" duration="15199000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Push">
       <option name="closed" value="true" />
@@ -134,7 +128,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740490356342</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Gewerkt aan plots die in het PvA komen.">
+      <option name="closed" value="true" />
+      <created>1740755952558</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1740755952558</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -155,7 +157,8 @@
     <MESSAGE value="Initial Push" />
     <MESSAGE value="First test with reading out and being able to write stuff to the MSP" />
     <MESSAGE value="Sensor wordt nu correct uitgelezen met code! Moet de code wel via CMD runnen.." />
-    <option name="LAST_COMMIT_MESSAGE" value="Sensor wordt nu correct uitgelezen met code! Moet de code wel via CMD runnen.." />
+    <MESSAGE value="Gewerkt aan plots die in het PvA komen." />
+    <option name="LAST_COMMIT_MESSAGE" value="Gewerkt aan plots die in het PvA komen." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TUSS4440$new.coverage" NAME="new Coverage Results" MODIFIED="1740745890118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
