@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="Sensor wordt nu correct uitgelezen met code! Moet de code wel via CMD runnen..">
-      <change afterPath="$PROJECT_DIR$/TUSS4440/Sending_pulse_or_receiving.py" afterDir="false" />
+    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="Een code waarmee ik met de ToF firmware kan &quot;praten&quot;. Kan commands sturen via de terminal en laat de response zien.">
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Examening_Data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/real_time_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/receive_data_on-off.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -50,24 +52,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Python.Sending_pulse_or_receiving.executor": "Run",
-    "Python.read_DC_values.executor": "Run",
-    "Python.tuss44x0-controller.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Adding__second__sensor",
-    "last_opened_file_path": "C:/Users/q.koelman/PycharmProjects/TUSS4440",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Python.Examening_Data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Sending_pulse_or_receiving.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ToF.executor&quot;: &quot;Run&quot;,
+    &quot;Python.read_DC_values.executor&quot;: &quot;Run&quot;,
+    &quot;Python.real_time_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.receive_data_on-off.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tuss44x0-controller.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Adding__second__sensor&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/q.koelman/PycharmProjects/TUSS4440&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\q.koelman\PycharmProjects\TUSS4440" />
@@ -92,6 +98,7 @@
       <workItem from="1740473687376" duration="7832000" />
       <workItem from="1740489133276" duration="286000" />
       <workItem from="1740489474318" duration="2518000" />
+      <workItem from="1741594456376" duration="596000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Push">
       <option name="closed" value="true" />
@@ -117,22 +124,55 @@
       <option name="project" value="LOCAL" />
       <updated>1740490356342</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Nu een code die laat zien als ontvangen uit/aan staat, en aangeeft wanneer een puls is verstuurd.">
+      <option name="closed" value="true" />
+      <created>1741249463435</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1741249463435</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Een code waarmee ik met de ToF firmware kan &quot;praten&quot;. Kan commands sturen via de terminal en laat de response zien.">
+      <option name="closed" value="true" />
+      <created>1741265838983</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1741265838983</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial Push" />
     <MESSAGE value="First test with reading out and being able to write stuff to the MSP" />
     <MESSAGE value="Sensor wordt nu correct uitgelezen met code! Moet de code wel via CMD runnen.." />
-    <option name="LAST_COMMIT_MESSAGE" value="Sensor wordt nu correct uitgelezen met code! Moet de code wel via CMD runnen.." />
+    <MESSAGE value="Nu een code die laat zien als ontvangen uit/aan staat, en aangeeft wanneer een puls is verstuurd." />
+    <MESSAGE value="Een code waarmee ik met de ToF firmware kan &quot;praten&quot;. Kan commands sturen via de terminal en laat de response zien." />
+    <option name="LAST_COMMIT_MESSAGE" value="Een code waarmee ik met de ToF firmware kan &quot;praten&quot;. Kan commands sturen via de terminal en laat de response zien." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TUSS4440$new.coverage" NAME="new Coverage Results" MODIFIED="1740745890118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Examening_Data.coverage" NAME="Examening_Data Coverage Results" MODIFIED="1741253765542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$read_DC_values.coverage" NAME="read_DC_values Coverage Results" MODIFIED="1740491958745" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Sending_pulse_or_receiving.coverage" NAME="Sending_pulse_or_receiving Coverage Results" MODIFIED="1741249395524" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$receive_data_on_off.coverage" NAME="receive_data_on-off Coverage Results" MODIFIED="1741254645664" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Sending_pulse_or_receiving.coverage" NAME="Sending_pulse_or_receiving Coverage Results" MODIFIED="1741251346406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$real_time_data.coverage" NAME="real_time_data Coverage Results" MODIFIED="1741253718519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$ToF.coverage" NAME="ToF Coverage Results" MODIFIED="1741265712358" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$fourier_analysis.coverage" NAME="fourier-analysis Coverage Results" MODIFIED="1740746349893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$tuss44x0_controller.coverage" NAME="tuss44x0-controller Coverage Results" MODIFIED="1740478070302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TUSS4440$ultrasonic_plots.coverage" NAME="ultrasonic-plots Coverage Results" MODIFIED="1740740473493" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/PvA" />
