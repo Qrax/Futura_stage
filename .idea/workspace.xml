@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="The test_pulse.py can now either read the data or sent a pulse.">
-      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Simuleren_TUSS_Signaal_verwerking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/simulatie_input_transducer-vout.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Test_different_gain.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/Simulatie_golF.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Simulatie_golF.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,17 +60,14 @@
     "Python.Receive_or_sent_2_boards.executor": "Run",
     "Python.Sending_pulse_or_receiving.executor": "Run",
     "Python.Simulatie_golF.executor": "Run",
-    "Python.Simuleren_TUSS_Signaal_verwerking.executor": "Run",
     "Python.Test_Different_Pulses.executor": "Run",
     "Python.Test_Reset.executor": "Run",
+    "Python.Test_different_gain.executor": "Run",
     "Python.Test_using_code_instead_of_button.executor": "Run",
-    "Python.Testing_1_Board_Pulse.executor": "Run",
     "Python.ToF.executor": "Run",
-    "Python.codecs.executor": "Run",
     "Python.read_DC_values.executor": "Run",
     "Python.real_time_data.executor": "Run",
     "Python.receive_data_on-off.executor": "Run",
-    "Python.simulatie_input_transducer-vout.executor": "Run",
     "Python.test_pulse.executor": "Run",
     "Python.test_snc.executor": "Run",
     "Python.tuss44x0-controller.executor": "Run",
@@ -180,7 +177,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741617017398</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Verschillende simulaties gemaakt om te visaliseren wat er met het signaal gebeurt in verschillende fases.">
+      <option name="closed" value="true" />
+      <created>1744115469418</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1744115469418</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,7 +210,8 @@
     <MESSAGE value="Een code waarmee ik met de ToF firmware kan &quot;praten&quot;. Kan commands sturen via de terminal en laat de response zien." />
     <MESSAGE value="Code seems to work, where it can sent a Pulse or Receive depending on what the python code sends." />
     <MESSAGE value="The test_pulse.py can now either read the data or sent a pulse." />
-    <option name="LAST_COMMIT_MESSAGE" value="The test_pulse.py can now either read the data or sent a pulse." />
+    <MESSAGE value="Verschillende simulaties gemaakt om te visaliseren wat er met het signaal gebeurt in verschillende fases." />
+    <option name="LAST_COMMIT_MESSAGE" value="Verschillende simulaties gemaakt om te visaliseren wat er met het signaal gebeurt in verschillende fases." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TUSS4440$Test_Reset.coverage" NAME="Test_Reset Coverage Results" MODIFIED="1741615456621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
@@ -224,12 +230,13 @@
     <SUITE FILE_PATH="coverage/TUSS4440$receive_data_on_off.coverage" NAME="receive_data_on-off Coverage Results" MODIFIED="1741254645664" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$tuss44x0_controller.coverage" NAME="tuss44x0-controller Coverage Results" MODIFIED="1740478070302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TUSS4440$simulatie_input_transducer_vout.coverage" NAME="simulatie_input_transducer-vout Coverage Results" MODIFIED="1744114671642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Simulatie_golF.coverage" NAME="Simulatie_golF Coverage Results" MODIFIED="1744035052408" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Simulatie_golF.coverage" NAME="Simulatie_golF Coverage Results" MODIFIED="1744118660414" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
     <SUITE FILE_PATH="coverage/TUSS4440$Examening_Data.coverage" NAME="Examening_Data Coverage Results" MODIFIED="1741253765542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$Simuleren_TUSS_Signaal_verwerking.coverage" NAME="Simuleren_TUSS_Signaal_verwerking Coverage Results" MODIFIED="1744113073076" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
     <SUITE FILE_PATH="coverage/TUSS4440$fourier_analysis.coverage" NAME="fourier-analysis Coverage Results" MODIFIED="1740746349893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$1_board_pulse.coverage" NAME="1_board_pulse Coverage Results" MODIFIED="1744096273363" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$Check_receiver.coverage" NAME="Check_receiver Coverage Results" MODIFIED="1741767824754" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Test_different_gain.coverage" NAME="Test_different_gain Coverage Results" MODIFIED="1744116202712" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
     <SUITE FILE_PATH="coverage/TUSS4440$ADC_values_single_sensor.coverage" NAME="ADC_values_single_sensor Coverage Results" MODIFIED="1741175453511" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$ultrasonic_plots.coverage" NAME="ultrasonic-plots Coverage Results" MODIFIED="1740740473493" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/PvA" />
   </component>
