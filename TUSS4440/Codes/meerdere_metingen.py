@@ -22,13 +22,13 @@ BAUD_RATE             = 115200
 SERIAL_TIMEOUT        = 1          # algemeen lees‑timeout
 CONNECT_DELAY         = 0.5
 CONFIRM_READ_DURATION = 1
-DATA_READ_TIMEOUT     = 2          # wachttijd per meetrun (s)
+DATA_READ_TIMEOUT     = 3          # wachttijd per meetrun (s)
 END_MARKER            = "E"
 
-NUM_RUNS              = 1000
-INTER_RUN_DELAY       = 2          # pauze tussen runs (s)
+NUM_RUNS              = 100
+INTER_RUN_DELAY       = 2         # pauze tussen runs (s)
 SAVE_INTERVAL         = 10         # aantal runs tussen tussentijdse CSV-saves
-FILENAME              = "sync_data.csv"  # bestandsnaam voor CSV
+FILENAME              = "sync_data_10_runs.csv"  # bestandsnaam voor CSV
 
 # --- Globale variabelen ---------------------------------------------------
 master_ser = slave_ser = None
@@ -121,50 +121,111 @@ def set_modes_and_show_initial_output() -> bool:
 def robust_read_serial_data(ser_port: serial.Serial,
                             data_q: queue.Queue,
                             stop_event: threading.Event):
-    """Leest ADC‑data uit één poort; zet (avg_time, adc_list) in queue."""
-    port_name = ser_port.port
-    buffer = ''
-    adc_values = []
-    avg_diff_us = None
-    found_avg = False
-    start_time = time.time()
+    """
+    Leest ADC-data uit één seriële poort en zet ze als
+        (avg_time_us, adc_list)
+    in de meegegeven queue.
+
+    Ondersteunt twee output-formaten van de firmware:
+
+    1. Oud:
+       - "Average time between samples (us): <float>"
+       - "timestamp, value"
+
+    2. Nieuw:
+       - "Total time from first to last sample: <float> us"
+       - "Number of samples: <int>"
+       - "Average per sample: <float> us"   (optioneel – kan ook berekend worden)
+       - "Samples:" gevolgd door één ADC-waarde per regel
+    """
+    port_name        = ser_port.port
+    buffer           = ''
+    adc_values       = []
+    avg_diff_us      = None
+    found_avg        = False               # expliciet gemeld door board
+    total_time_us    = None
+    num_samples      = None
+    reading_samples  = False               # na regel "Samples:"
+    start_time       = time.time()
 
     while not stop_event.is_set() and (time.time() - start_time < DATA_READ_TIMEOUT):
         try:
             if ser_port.in_waiting:
                 chunk = ser_port.read(ser_port.in_waiting).decode(errors='ignore')
-                print(f"RAW {port_name}: {chunk}", end='')      # live raw print
+                print(f"RAW {port_name}: {chunk}", end='', flush=True)
                 buffer += chunk
 
+                # verwerk complete regels
                 while '\n' in buffer:
                     line, buffer = buffer.split('\n', 1)
                     line = line.strip()
                     if not line:
                         continue
+
+                    # einde-markering
                     if line == END_MARKER:
+                        # als board geen gemiddelde stuurde, bereken het
+                        if avg_diff_us is None and total_time_us and num_samples:
+                            avg_diff_us = total_time_us / num_samples
                         data_q.put((avg_diff_us, adc_values))
                         return
 
-                    prefix = "Average time between samples (us):"
-                    if not found_avg and line.startswith(prefix):
+                    # ---------- headerregels ----------
+                    if line.startswith("Average time between samples (us):"):
+                        # oud formaat
                         try:
-                            avg_diff_us = float(line[len(prefix):].strip())
-                            found_avg = True
-                            print(f"\n>>> {port_name} AvgT={avg_diff_us:.1f} µs <<<")
+                            avg_diff_us = float(line.split(':', 1)[1].strip())
+                            found_avg   = True
+                            print(f"\n>>> {port_name} AvgT={avg_diff_us:.1f} µs <<<")
                         except ValueError:
                             print(f"\nWARN {port_name}: kan AvgT niet parsen: '{line}'")
                         continue
 
-                    # ADC‑regel: "timestamp, value"
+                    if line.startswith("Total time from first to last sample:"):
+                        try:
+                            total_time_us = float(line.split(':', 1)[1].split()[0])
+                        except ValueError:
+                            pass
+                        continue
+
+                    if line.startswith("Number of samples"):
+                        try:
+                            num_samples = int(line.split(':', 1)[1].strip())
+                        except ValueError:
+                            pass
+                        continue
+
+                    if line.startswith("Average per sample"):
+                        try:
+                            avg_diff_us = float(line.split(':', 1)[1].split()[0])
+                            found_avg   = True
+                            print(f"\n>>> {port_name} AvgT={avg_diff_us:.1f} µs <<<")
+                        except ValueError:
+                            pass
+                        continue
+
+                    if line.lower().startswith("samples"):
+                        reading_samples = True
+                        continue
+                    # ---------- sample-regels ----------
+                    if reading_samples:
+                        # nieuw formaat: één waarde per regel
+                        try:
+                            adc_values.append(int(line))
+                        except ValueError:
+                            pass
+                        continue
+
+                    # oud formaat: "timestamp, adc"
                     if ',' in line:
                         try:
                             _, adc_str = line.split(',', 1)
-                            adc = int(adc_str.strip())
-                            adc_values.append(adc)
+                            adc_values.append(int(adc_str.strip()))
                         except ValueError:
                             pass
             else:
                 time.sleep(0.01)
+
         except serial.SerialException as e:
             print(f"\nSeriële fout {port_name}: {e}")
             break
@@ -172,8 +233,11 @@ def robust_read_serial_data(ser_port: serial.Serial,
             print(f"\nAlgemene fout {port_name}: {e}")
             break
 
-    # timeout – wat we hebben toch opsturen
+    # timeout – stuur wat er is
+    if avg_diff_us is None and total_time_us and num_samples:
+        avg_diff_us = total_time_us / num_samples
     data_q.put((avg_diff_us, adc_values))
+
 
 def close_ports():
     """Sluit beide seriële poorten."""
