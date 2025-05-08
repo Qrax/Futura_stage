@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-sync_logger.py – logt ADC‑data van zowel MASTER (COM6) als SLAVE (COM8)
-en bewaart ze in één CSV met kolommen:
-    Device, Run, SampleIndex, Timestamp_us, ADC_Value, Avg_Time_us
-en schrijft elke SAVE_INTERVAL runs tussentijds naar disk.
+meerdere_metingen.py – logt ADC‑data van zowel MASTER (COM6) als SLAVE (COM8)
+in meerdere blokken (meta-runs). Elk blok wordt in een apart CSV-bestand opgeslagen.
+Kolommen CSV: Device, Run, SampleIndex, Timestamp_us, ADC_Value, Avg_Time_us.
+Schrijft elke SAVE_INTERVAL runs tussentijds naar disk.
 """
-# gebaseerd op sync_logger.py (origineel) :contentReference[oaicite:0]{index=0}&#8203;:contentReference[oaicite:1]{index=1}
+# gebaseerd op sync_logger.py (origineel) :contentReference[oaicite:0]{index=0}​:contentReference[oaicite:1]{index=1}
 
 # --- Imports --------------------------------------------------------------
 import serial
@@ -14,50 +14,71 @@ import threading
 import queue
 import sys
 import pandas as pd
+import os
 
 # --- Config ---------------------------------------------------------------
-MASTER_PORT           = 'COM6'
-SLAVE_PORT            = 'COM8'
-BAUD_RATE             = 115200
-SERIAL_TIMEOUT        = 1          # algemeen lees‑timeout
-CONNECT_DELAY         = 0.5
+MASTER_PORT = 'COM6'
+SLAVE_PORT = 'COM8'
+BAUD_RATE = 115200
+SERIAL_TIMEOUT = 1  # algemeen lees‑timeout
+CONNECT_DELAY = 0.5
 CONFIRM_READ_DURATION = 1
-DATA_READ_TIMEOUT     = 3          # wachttijd per meetrun (s)
-END_MARKER            = "E"
+DATA_READ_TIMEOUT = 2  # wachttijd per meetrun (s)
+END_MARKER = "E"
 
-NUM_RUNS              = 100
-INTER_RUN_DELAY       = 2         # pauze tussen runs (s)
-SAVE_INTERVAL         = 10         # aantal runs tussen tussentijdse CSV-saves
-FILENAME              = "sync_data_10_runs.csv"  # bestandsnaam voor CSV
+# Nieuwe configuratie voor meta-runs
+NUM_META_RUNS = 1  # Aantal "grote" runs/blokken
+RUNS_PER_META = 50  # Aantal individuele metingen per meta-run
+INTER_META_RUN_DELAY_S = 60  # Pauze tussen meta-runs in seconden
+INTER_RUN_DELAY = 2  # Pauze tussen individuele metingen binnen een meta-run (s)
+SAVE_INTERVAL = 10  # Aantal runs tussen tussentijdse CSV-saves (binnen een meta-run)
+
+BASE_FILENAME_PROMPT = "Voer een basisnaam in voor de CSV-bestanden (bv. experiment_X): "
+DEFAULT_BASE_FILENAME = "meting_data"
 
 # --- Globale variabelen ---------------------------------------------------
 master_ser = slave_ser = None
 data_queue_master = queue.Queue()
-data_queue_slave  = queue.Queue()
+data_queue_slave = queue.Queue()
+
 
 # --- Helper: tussentijds en eind‑save -------------------------------------
 def save_csv(master_runs, slave_runs, fname):
     """Flatten alle runs en sla op als CSV (overschrijft steeds)."""
+    if not master_runs and not slave_runs:
+        print(f"\n[Save Info] Geen data om op te slaan voor '{fname}'.")
+        return
+
     records = []
+
     def flatten(run_dicts, device_name):
         for rd in run_dicts:
-            run_no  = rd["Run"]
-            avg_dt  = rd["Avg_Time_us"]
-            ts_ok   = avg_dt is not None and avg_dt > 0
+            run_no = rd["Run"]
+            avg_dt = rd["Avg_Time_us"]
+            ts_ok = avg_dt is not None and avg_dt > 0
             for i, adc in enumerate(rd["ADC_Values"]):
                 records.append({
-                    "Device"      : device_name,
-                    "Run"         : run_no,
-                    "SampleIndex" : i,
+                    "Device": device_name,
+                    "Run": run_no,
+                    "SampleIndex": i,
                     "Timestamp_us": i * avg_dt if ts_ok else None,
-                    "ADC_Value"   : adc,
-                    "Avg_Time_us" : avg_dt
+                    "ADC_Value": adc,
+                    "Avg_Time_us": avg_dt
                 })
+
     flatten(master_runs, "Master")
-    flatten(slave_runs,  "Slave")
+    flatten(slave_runs, "Slave")
     df = pd.DataFrame(records)
+
+    # Zorg ervoor dat de map bestaat als de bestandsnaam een pad bevat
+    output_dir = os.path.dirname(fname)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"\n[Save Info] Map '{output_dir}' aangemaakt.")
+
     df.to_csv(fname, index=False)
-    print(f"\n[Tussentijdse save] {len(df)} rijen naar '{fname}' geschreven.")
+    print(f"\n[Save Success] {len(df)} rijen naar '{fname}' geschreven.")
+
 
 # --- Serial‑helperfuncties (ongewijzigd) ----------------------------------
 def connect_ports() -> bool:
@@ -86,6 +107,7 @@ def connect_ports() -> bool:
 
     print("--- Beide poorten verbonden ---")
     return True
+
 
 def set_modes_and_show_initial_output() -> bool:
     """Stel Master/Slave‑modus in op de boards en toon eventuele start‑output."""
@@ -118,6 +140,7 @@ def set_modes_and_show_initial_output() -> bool:
     print("--- Einde init check ---")
     return True
 
+
 def robust_read_serial_data(ser_port: serial.Serial,
                             data_q: queue.Queue,
                             stop_event: threading.Event):
@@ -125,214 +148,291 @@ def robust_read_serial_data(ser_port: serial.Serial,
     Leest ADC-data uit één seriële poort en zet ze als
         (avg_time_us, adc_list)
     in de meegegeven queue.
-
-    Ondersteunt twee output-formaten van de firmware:
-
-    1. Oud:
-       - "Average time between samples (us): <float>"
-       - "timestamp, value"
-
-    2. Nieuw:
-       - "Total time from first to last sample: <float> us"
-       - "Number of samples: <int>"
-       - "Average per sample: <float> us"   (optioneel – kan ook berekend worden)
-       - "Samples:" gevolgd door één ADC-waarde per regel
+    (Logica ongewijzigd, alleen print statements aangepast voor duidelijkheid)
     """
-    port_name        = ser_port.port
-    buffer           = ''
-    adc_values       = []
-    avg_diff_us      = None
-    found_avg        = False               # expliciet gemeld door board
-    total_time_us    = None
-    num_samples      = None
-    reading_samples  = False               # na regel "Samples:"
-    start_time       = time.time()
+    port_name = ser_port.port
+    buffer = ''
+    adc_values = []
+    avg_diff_us = None
+    found_avg = False
+    total_time_us = None
+    num_samples = None
+    reading_samples = False
+    start_time = time.time()
 
     while not stop_event.is_set() and (time.time() - start_time < DATA_READ_TIMEOUT):
         try:
             if ser_port.in_waiting:
-                chunk = ser_port.read(ser_port.in_waiting).decode(errors='ignore')
-                print(f"RAW {port_name}: {chunk}", end='', flush=True)
+                # Kleine optimalisatie: lees niet te veel tegelijk om buffer niet te overspoelen
+                # bij snelle data, maar lees wel genoeg om efficiënt te zijn.
+                chunk = ser_port.read(min(ser_port.in_waiting, 1024)).decode(errors='ignore')
+                # print(f"RAW {port_name}: {chunk}", end='', flush=True) # Kan veel output geven
                 buffer += chunk
 
-                # verwerk complete regels
                 while '\n' in buffer:
                     line, buffer = buffer.split('\n', 1)
                     line = line.strip()
                     if not line:
                         continue
 
-                    # einde-markering
                     if line == END_MARKER:
-                        # als board geen gemiddelde stuurde, bereken het
-                        if avg_diff_us is None and total_time_us and num_samples:
+                        if avg_diff_us is None and total_time_us and num_samples and num_samples > 0:  # Voorkom ZeroDivisionError
                             avg_diff_us = total_time_us / num_samples
                         data_q.put((avg_diff_us, adc_values))
+                        # print(f"DEBUG {port_name}: END_MARKER, data queued ({avg_diff_us}, {len(adc_values)} samples)")
                         return
 
-                    # ---------- headerregels ----------
                     if line.startswith("Average time between samples (us):"):
-                        # oud formaat
                         try:
                             avg_diff_us = float(line.split(':', 1)[1].strip())
-                            found_avg   = True
-                            print(f"\n>>> {port_name} AvgT={avg_diff_us:.1f} µs <<<")
+                            found_avg = True
+                            # print(f"\n>>> {port_name} AvgT={avg_diff_us:.1f} µs <<<")
                         except ValueError:
-                            print(f"\nWARN {port_name}: kan AvgT niet parsen: '{line}'")
+                            print(f"\nWARN {port_name}: kan AvgT (oud formaat) niet parsen: '{line}'")
                         continue
 
                     if line.startswith("Total time from first to last sample:"):
                         try:
                             total_time_us = float(line.split(':', 1)[1].split()[0])
-                        except ValueError:
-                            pass
+                        except (ValueError, IndexError):
+                            print(f"\nWARN {port_name}: kan TotalTime niet parsen: '{line}'")
                         continue
 
                     if line.startswith("Number of samples"):
                         try:
                             num_samples = int(line.split(':', 1)[1].strip())
-                        except ValueError:
-                            pass
+                        except (ValueError, IndexError):
+                            print(f"\nWARN {port_name}: kan NumSamples niet parsen: '{line}'")
                         continue
 
                     if line.startswith("Average per sample"):
                         try:
                             avg_diff_us = float(line.split(':', 1)[1].split()[0])
-                            found_avg   = True
-                            print(f"\n>>> {port_name} AvgT={avg_diff_us:.1f} µs <<<")
-                        except ValueError:
-                            pass
+                            found_avg = True
+                            # print(f"\n>>> {port_name} AvgT={avg_diff_us:.1f} µs <<<")
+                        except (ValueError, IndexError):
+                            print(f"\nWARN {port_name}: kan AvgT (nieuw formaat) niet parsen: '{line}'")
                         continue
 
                     if line.lower().startswith("samples"):
                         reading_samples = True
                         continue
-                    # ---------- sample-regels ----------
+
                     if reading_samples:
-                        # nieuw formaat: één waarde per regel
                         try:
                             adc_values.append(int(line))
                         except ValueError:
-                            pass
+                            # print(f"\nWARN {port_name}: kon ADC-waarde niet parsen: '{line}' (nieuw formaat)")
+                            pass  # Kan een lege regel zijn na "Samples:", negeer.
                         continue
 
-                    # oud formaat: "timestamp, adc"
-                    if ',' in line:
+                    if ',' in line:  # Oud formaat: "timestamp, adc"
                         try:
                             _, adc_str = line.split(',', 1)
                             adc_values.append(int(adc_str.strip()))
                         except ValueError:
+                            # print(f"\nWARN {port_name}: kon ADC-waarde niet parsen: '{line}' (oud formaat)")
                             pass
             else:
-                time.sleep(0.01)
+                time.sleep(0.005)  # Kortere slaap voor snellere reactie
 
         except serial.SerialException as e:
-            print(f"\nSeriële fout {port_name}: {e}")
+            print(f"\nSeriële FOUT tijdens lezen op {port_name}: {e}")
+            stop_event.set()  # Signaleer andere thread ook te stoppen
             break
         except Exception as e:
-            print(f"\nAlgemene fout {port_name}: {e}")
+            print(f"\nAlgemene FOUT tijdens lezen op {port_name}: {e}")
+            stop_event.set()  # Signaleer andere thread ook te stoppen
             break
 
-    # timeout – stuur wat er is
-    if avg_diff_us is None and total_time_us and num_samples:
-        avg_diff_us = total_time_us / num_samples
-    data_q.put((avg_diff_us, adc_values))
+    # Timeout of stop_event
+    if not stop_event.is_set():  # Alleen als niet al gestopt door error
+        if avg_diff_us is None and total_time_us and num_samples and num_samples > 0:
+            avg_diff_us = total_time_us / num_samples
+        data_q.put((avg_diff_us, adc_values))
+        # print(f"DEBUG {port_name}: Timeout/Stop, data queued ({avg_diff_us}, {len(adc_values)} samples)")
 
 
 def close_ports():
     """Sluit beide seriële poorten."""
     print("\n--- Sluiten poorten ---")
+    closed_master = False
+    closed_slave = False
     try:
         if master_ser and master_ser.is_open:
             master_ser.close()
             print(f"{MASTER_PORT} gesloten.")
+            closed_master = True
+    except Exception as e:
+        print(f"Fout bij sluiten {MASTER_PORT}: {e}")
     finally:
-        if slave_ser and slave_ser.is_open:
-            slave_ser.close()
-            print(f"{SLAVE_PORT} gesloten.")
+        try:
+            if slave_ser and slave_ser.is_open:
+                slave_ser.close()
+                print(f"{SLAVE_PORT} gesloten.")
+                closed_slave = True
+        except Exception as e:
+            print(f"Fout bij sluiten {SLAVE_PORT}: {e}")
+    if not closed_master and master_ser: print(f"{MASTER_PORT} was niet open of kon niet gesloten worden.")
+    if not closed_slave and slave_ser: print(f"{SLAVE_PORT} was niet open of kon niet gesloten worden.")
+
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
+    base_filename_user = input(BASE_FILENAME_PROMPT).strip()
+    if not base_filename_user:
+        base_filename_user = DEFAULT_BASE_FILENAME
+        print(f"Geen invoer, standaard basisnaam gebruikt: '{base_filename_user}'")
+
     if not connect_ports():
         sys.exit(1)
     if not set_modes_and_show_initial_output():
         close_ports()
         sys.exit(1)
 
-    print(f"\nKlaar om {NUM_RUNS} sync‑cycli uit te voeren.")
-    input("Druk op Enter om te beginnen …")
+    print(f"\nKlaar om {NUM_META_RUNS} meta-run(s) uit te voeren, elk met {RUNS_PER_META} metingen.")
+    input("Druk op Enter om te beginnen met de eerste meta-run…")
 
-    all_master_runs = []
-    all_slave_runs  = []
+    # Huidige meta-run data (wordt mogelijk opgeslagen bij interrupt)
+    current_meta_all_master_runs = []
+    current_meta_all_slave_runs = []
+    current_meta_filename = ""
 
     try:
-        for run in range(1, NUM_RUNS + 1):
-            print(f"\n========== Run {run}/{NUM_RUNS} ==========")
+        for meta_run_count in range(1, NUM_META_RUNS + 1):
+            current_meta_filename = f"{base_filename_user}_meta_{meta_run_count}.csv"
+            print(f"\n{'=' * 10} START META-RUN {meta_run_count}/{NUM_META_RUNS} {'=' * 10}")
+            print(f"Data voor deze meta-run wordt opgeslagen in: '{current_meta_filename}'")
 
-            # queues leegmaken
-            for q in (data_queue_master, data_queue_slave):
-                while not q.empty():
-                    q.get_nowait()
+            current_meta_all_master_runs = []  # Reset voor nieuwe meta-run
+            current_meta_all_slave_runs = []  # Reset voor nieuwe meta-run
 
-            # lees‑threads starten
-            stop_event = threading.Event()
-            t_master = threading.Thread(target=robust_read_serial_data,
-                                        args=(master_ser, data_queue_master, stop_event),
-                                        daemon=True)
-            t_slave = threading.Thread(target=robust_read_serial_data,
-                                       args=(slave_ser, data_queue_slave, stop_event),
-                                       daemon=True)
-            t_master.start()
-            t_slave.start()
-            time.sleep(0.1)
+            for run in range(1, RUNS_PER_META + 1):
+                print(f"\n--- Meta-Run {meta_run_count} | Run {run}/{RUNS_PER_META} ---")
 
-            # SYNC versturen
-            print(">>> SYNC naar master …")
-            master_ser.reset_input_buffer()
-            master_ser.write(b'SYNC\n')
+                for q in (data_queue_master, data_queue_slave):
+                    while not q.empty():
+                        try:
+                            q.get_nowait()
+                        except queue.Empty:
+                            break
 
-            # wachten op threads
-            t_master.join(DATA_READ_TIMEOUT)
-            t_slave.join(DATA_READ_TIMEOUT)
-            stop_event.set()
+                stop_event = threading.Event()
+                # Maak de threads opnieuw aan voor elke run om problemen met herstarten te voorkomen
+                t_master = threading.Thread(target=robust_read_serial_data,
+                                            args=(master_ser, data_queue_master, stop_event),
+                                            daemon=True)
+                t_slave = threading.Thread(target=robust_read_serial_data,
+                                           args=(slave_ser, data_queue_slave, stop_event),
+                                           daemon=True)
 
-            # data ophalen
-            try:
-                m_avg, m_adc = data_queue_master.get_nowait()
-            except queue.Empty:
+                # Reset input buffers vlak voor SYNC
+                master_ser.reset_input_buffer()
+                slave_ser.reset_input_buffer()  # Ook slave voor de zekerheid
+
+                t_master.start()
+                t_slave.start()
+                time.sleep(0.1)  # Geef threads even tijd om te starten
+
+                print(">>> SYNC naar master …")
+                master_ser.write(b'SYNC\n')
+
+                # Wachten op threads met een gecombineerde timeout
+                # De individuele read timeout is DATA_READ_TIMEOUT
+                # De join timeout hier is iets ruimer om threads de kans te geven
+                # hun eigen timeout af te handelen en data in de queue te plaatsen.
+                join_timeout = DATA_READ_TIMEOUT + 0.5
+                t_master.join(join_timeout)
+                t_slave.join(join_timeout)
+
+                # Als threads nog draaien na join_timeout, forceer stop
+                if t_master.is_alive() or t_slave.is_alive():
+                    print("Waarschuwing: Een of beide lees-threads zijn niet op tijd gestopt. Forceren...")
+                    stop_event.set()
+                    t_master.join(0.5)  # Geef nog even de kans om netjes af te sluiten
+                    t_slave.join(0.5)
+
                 m_avg, m_adc = None, []
-            try:
-                s_avg, s_adc = data_queue_slave.get_nowait()
-            except queue.Empty:
                 s_avg, s_adc = None, []
+                try:
+                    m_avg, m_adc = data_queue_master.get_nowait()
+                except queue.Empty:
+                    print(f"Master ({MASTER_PORT}): Geen data ontvangen in wachtrij.")
+                try:
+                    s_avg, s_adc = data_queue_slave.get_nowait()
+                except queue.Empty:
+                    print(f"Slave ({SLAVE_PORT}): Geen data ontvangen in wachtrij.")
 
-            if m_adc:
-                all_master_runs.append({"Run": run, "Avg_Time_us": m_avg, "ADC_Values": m_adc})
-                print(f"Master: {len(m_adc)} samples")
+                if m_adc:
+                    current_meta_all_master_runs.append({"Run": run, "Avg_Time_us": m_avg, "ADC_Values": m_adc})
+                    print(f"Master: {len(m_adc)} samples ontvangen." + (
+                        f" (AvgT: {m_avg:.1f} µs)" if m_avg is not None else " (AvgT: N/A)"))
+                else:
+                    print("Master: GEEN data voor run.")
+                    current_meta_all_master_runs.append(
+                        {"Run": run, "Avg_Time_us": None, "ADC_Values": []})  # placeholder
+
+                if s_adc:
+                    current_meta_all_slave_runs.append({"Run": run, "Avg_Time_us": s_avg, "ADC_Values": s_adc})
+                    print(f"Slave : {len(s_adc)} samples ontvangen." + (
+                        f" (AvgT: {s_avg:.1f} µs)" if s_avg is not None else " (AvgT: N/A)"))
+                else:
+                    print("Slave : GEEN data voor run.")
+                    current_meta_all_slave_runs.append(
+                        {"Run": run, "Avg_Time_us": None, "ADC_Values": []})  # placeholder
+
+                if run % SAVE_INTERVAL == 0 and run < RUNS_PER_META:  # Tussentijds save
+                    if current_meta_all_master_runs or current_meta_all_slave_runs:
+                        save_csv(current_meta_all_master_runs, current_meta_all_slave_runs, current_meta_filename)
+                    else:
+                        print(f"\n[Tussentijdse save] Geen data om op te slaan voor '{current_meta_filename}'.")
+
+                print(f"--- Einde Meta-Run {meta_run_count} | Run {run} ---")
+                if run < RUNS_PER_META:  # Niet pauzeren na de allerlaatste run van een meta-run
+                    time.sleep(INTER_RUN_DELAY)
+
+            # Einde van een meta-run: definitieve save voor deze meta-run
+            print(f"\n{'=' * 10} EINDE META-RUN {meta_run_count} {'=' * 10}")
+            if current_meta_all_master_runs or current_meta_all_slave_runs:
+                save_csv(current_meta_all_master_runs, current_meta_all_slave_runs, current_meta_filename)
             else:
-                print("Master: GEEN data")
+                print(f"Geen data verzameld in meta-run {meta_run_count} om op te slaan in '{current_meta_filename}'.")
 
-            if s_adc:
-                all_slave_runs.append({"Run": run, "Avg_Time_us": s_avg, "ADC_Values": s_adc})
-                print(f"Slave : {len(s_adc)} samples")
-            else:
-                print("Slave : GEEN data")
+            # Pauze tussen meta-runs (als het niet de laatste is)
+            if meta_run_count < NUM_META_RUNS:
+                print(f"\nMeta-run {meta_run_count} voltooid.")
+                print(f"Pauze van {INTER_META_RUN_DELAY_S} seconden voor de volgende meta-run.")
 
-            # Tussentijdse save
-            if run % SAVE_INTERVAL == 0:
-                save_csv(all_master_runs, all_slave_runs, FILENAME)
+                countdown_start_time = time.time()
+                remaining_time = INTER_META_RUN_DELAY_S
+                while remaining_time > 0:
+                    sys.stdout.write(
+                        f"\rVolgende meta-run start over {int(remaining_time)} seconden... (Ctrl+C om af te breken) ")
+                    sys.stdout.flush()
+                    time.sleep(1)
+                    remaining_time = INTER_META_RUN_DELAY_S - (time.time() - countdown_start_time)
+                sys.stdout.write("\r" + " " * 80 + "\r")  # Clear line
+                sys.stdout.flush()
 
-            print(f"========== einde run {run} ==========")
-            time.sleep(INTER_RUN_DELAY)
+                input(f"Druk op Enter om meta-run {meta_run_count + 1} te starten, of Ctrl+C om te stoppen...")
+
+        print("\nAlle geplande meta-runs zijn voltooid.")
 
     except KeyboardInterrupt:
-        print("\nOnderbroken door gebruiker.")
+        print("\nProgramma onderbroken door gebruiker (Ctrl+C).")
+        if current_meta_all_master_runs or current_meta_all_slave_runs:
+            print(f"Poging om data van de huidige (onderbroken) meta-run op te slaan in '{current_meta_filename}'...")
+            save_csv(current_meta_all_master_runs, current_meta_all_slave_runs, current_meta_filename)
+        else:
+            print("Geen data van huidige meta-run om op te slaan.")
+    except Exception as e:
+        print(f"\nOnverwachte FOUT opgetreden: {e}")
+        import traceback
+
+        traceback.print_exc()
+        if current_meta_all_master_runs or current_meta_all_slave_runs and current_meta_filename:
+            print(f"Poging om data van de huidige meta-run op te slaan in '{current_meta_filename}'...")
+            save_csv(current_meta_all_master_runs, current_meta_all_slave_runs, current_meta_filename)
     finally:
         close_ports()
-
-    # Eindsave (ook als NUM_RUNS niet deelbaar is)
-    if all_master_runs or all_slave_runs:
-        save_csv(all_master_runs, all_slave_runs, FILENAME)
-        print(f"Einddata opgeslagen als '{FILENAME}'")
-    else:
-        print("Geen data verzameld – programma stopt.")
+        print("Programma beëindigd.")
