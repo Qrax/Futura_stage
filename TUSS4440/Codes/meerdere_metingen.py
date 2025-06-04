@@ -27,14 +27,15 @@ DATA_READ_TIMEOUT = 2  # wachttijd per meetrun (s)
 END_MARKER = "E"
 
 # Nieuwe configuratie voor meta-runs
-NUM_META_RUNS = 1  # Aantal "grote" runs/blokken
-RUNS_PER_META = 50  # Aantal individuele metingen per meta-run
-INTER_META_RUN_DELAY_S = 60  # Pauze tussen meta-runs in seconden
+NUM_META_RUNS = 3  # Aantal "grote" runs/blokken
+RUNS_PER_META = 25  # Aantal individuele metingen per meta-run
+INTER_META_RUN_DELAY_S = 15  # Pauze tussen meta-runs in seconden
 INTER_RUN_DELAY = 2  # Pauze tussen individuele metingen binnen een meta-run (s)
 SAVE_INTERVAL = 10  # Aantal runs tussen tussentijdse CSV-saves (binnen een meta-run)
 
 BASE_FILENAME_PROMPT = "Voer een basisnaam in voor de CSV-bestanden (bv. experiment_X): "
 DEFAULT_BASE_FILENAME = "meting_data"
+TARGET_DATA_SUBFOLDER = os.path.join("..", "data", "UltraSoon_Measurements")
 
 # --- Globale variabelen ---------------------------------------------------
 master_ser = slave_ser = None
@@ -72,8 +73,8 @@ def save_csv(master_runs, slave_runs, fname):
 
     # Zorg ervoor dat de map bestaat als de bestandsnaam een pad bevat
     output_dir = os.path.dirname(fname)
-    if output_dir and not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
         print(f"\n[Save Info] Map '{output_dir}' aangemaakt.")
 
     df.to_csv(fname, index=False)
@@ -300,7 +301,8 @@ if __name__ == "__main__":
 
     try:
         for meta_run_count in range(1, NUM_META_RUNS + 1):
-            current_meta_filename = f"{base_filename_user}_meta_{meta_run_count}.csv"
+            base_csv_name = f"{base_filename_user}_meta_{meta_run_count}.csv"
+            current_meta_filename = os.path.join(TARGET_DATA_SUBFOLDER, base_csv_name)
             print(f"\n{'=' * 10} START META-RUN {meta_run_count}/{NUM_META_RUNS} {'=' * 10}")
             print(f"Data voor deze meta-run wordt opgeslagen in: '{current_meta_filename}'")
 
