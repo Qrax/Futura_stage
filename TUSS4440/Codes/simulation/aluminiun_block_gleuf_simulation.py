@@ -6,20 +6,28 @@ import os
 import imageio
 import tempfile
 from tqdm import tqdm
+# Import voor colorbar
+from mpl_toolkits.axes_grid1 import make_axes_locatable  # Alternatieve manier voor colorbar positionering
 
 
 class AluminumBlock:
+    # __init__ en andere methoden blijven grotendeels hetzelfde als in het vorige antwoord
+    # ... (vorige code voor __init__, _distance, _draw_block_with_slot, get_block_description, plot_geometry, generate_emission_pattern) ...
     def __init__(self, has_slot_param=True, slot_depth_param=8.25, slot_width_param=1.95,
-                 transducer_angle_center_param=0):  # Gewijzigd
+                 transducer_angle_center_param=0,
+                 initial_amplitude_param=1.0,
+                 reflection_loss_coeff_param=0.85,
+                 min_amplitude_cutoff_param=0.01):
         self.length = 100
         self.height = 20
         self.width = 20
-
         self.epsilon = 1e-9
         self.boundary_check_epsilon = 1e-7
-
         self.has_slot = has_slot_param
-        self.transducer_angle_center = transducer_angle_center_param  # Nieuwe parameter gebruikt
+        self.transducer_angle_center = transducer_angle_center_param
+        self.initial_amplitude = initial_amplitude_param
+        self.reflection_loss_coefficient = reflection_loss_coeff_param
+        self.min_amplitude_cutoff = min_amplitude_cutoff_param
 
         if self.has_slot:
             self.slot_width = slot_width_param
@@ -42,11 +50,10 @@ class AluminumBlock:
         self.frequency = 40000
         self.wavelength = self.sound_speed_mm_s / self.frequency
         self.transducer_position = (0, self.height / 2)
-        # self.transducer_angle_center = 0 # Verplaatst naar __init__ parameter
         self.transducer_angle_spread = 35
         self.receiver_position = (self.length, self.height / 2)
         self.num_rays = 50
-        self.max_bounces = 15
+        self.max_bounces = 100
         self.initial_ray_angles = []
 
     def _distance(self, p1, p2):
@@ -72,7 +79,8 @@ class AluminumBlock:
             desc += f"Slot (W:{self.slot_width:.2f} D:{self.slot_depth:.2f})"
         else:
             desc += "No Slot"
-        desc += f", Transducer Angle: {self.transducer_angle_center}°"
+        desc += f", Angle: {self.transducer_angle_center}°"
+        desc += f", Reflect.Loss: {(1 - self.reflection_loss_coefficient) * 100:.0f}%"
         return desc
 
     def plot_geometry(self, filename_suffix=""):
@@ -97,7 +105,7 @@ class AluminumBlock:
         ax.set_ylim(-5, self.height + 5)
         ax.set_xlabel('Length (mm)');
         ax.set_ylabel('Height (mm)')
-        ax.set_title(f'Aluminum Block Geometry ({self.get_block_description()})')  # Gewijzigd voor dynamische titel
+        ax.set_title(f'Aluminum Block Setup ({self.get_block_description()})')
         ax.set_aspect('equal');
         ax.grid(True, linestyle='--', alpha=0.7)
         from matplotlib.lines import Line2D
@@ -107,11 +115,11 @@ class AluminumBlock:
             Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Transducer (40kHz)'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Receiver'),
             Line2D([0], [0], linestyle='--', color='blue', alpha=0.5,
-                   label=f'Emission Angle: {self.transducer_angle_center}±{self.transducer_angle_spread}°')
+                   label=f'Emission Cone: {self.transducer_angle_center}±{self.transducer_angle_spread}°')
         ]
         ax.legend(handles=legend_elements, loc='upper right')
         props_text_base = (f"Sound Speed: {self.sound_speed} m/s\nFrequency: {self.frequency / 1000} kHz\n"
-                           f"Wavelength: {self.wavelength:.2f} mm")
+                           f"Wavelength: {self.wavelength:.2f} mm\nReflect. Coeff: {self.reflection_loss_coefficient:.2f}")
         if self.has_slot:
             props_text_base += f"\nSlot: W={self.slot_width:.2f}mm, D={self.slot_depth:.2f}mm"
         props_text_base += f"\nTransducer Angle: {self.transducer_angle_center}°"
@@ -137,70 +145,28 @@ class AluminumBlock:
         self.initial_ray_angles = list(angles)
         return angles
 
-    def _get_color_for_ray_symmetric_deviation(self, initial_angle_rad, colormap):
-        center_angle_rad_val = np.radians(self.transducer_angle_center)
-        max_deviation_rad = np.radians(self.transducer_angle_spread)
-        if max_deviation_rad < self.epsilon: return colormap(0)
-        # Gebruik de afwijking ten opzichte van de centrale hoek van de bundel, niet per se 0 graden
-        absolute_deviation_rad = abs(initial_angle_rad - center_angle_rad_val)
-        normalized_value = np.clip(absolute_deviation_rad / max_deviation_rad, 0, 1)
-        return colormap(normalized_value)
+    def _get_color_for_amplitude(self, amplitude, colormap):
+        # Normaliseer amplitude (0 tot initial_amplitude) naar (0 tot 1) voor de colormap
+        normalized_amp = np.clip(amplitude / self.initial_amplitude, 0.0, 1.0)
+        # Als de colormap zelf al "reversed" is (zoals "inferno_r"),
+        # dan mapt normalized_amp=1.0 (hoge energie) naar de donkere kant van "inferno_r"
+        # en normalized_amp=0.0 (lage energie) naar de lichte kant van "inferno_r".
+        return colormap(normalized_amp)
 
-    def plot_emission_pattern(self, filename_suffix="", chosen_cmap_name="cividis"):
-        temp_angles_linear = self.generate_emission_pattern(use_gaussian=False)
-        temp_angles_gaussian = self.generate_emission_pattern(use_gaussian=True)  # Regenerate for gaussian
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-        cmap_for_emission_plot = plt.get_cmap(chosen_cmap_name)
-
-        def plot_rays_on_ax(ax, angles_to_plot, title):
-            self._draw_block_with_slot(ax)
-            transducer_circle = plt.Circle(self.transducer_position, 2, color='blue', alpha=0.7);
-            ax.add_patch(transducer_circle)
-            receiver_circle = plt.Circle(self.receiver_position, 2, color='green', alpha=0.7);
-            ax.add_patch(receiver_circle)
-            ray_length = self.length * 0.3
-            for angle_val in angles_to_plot:
-                color = self._get_color_for_ray_symmetric_deviation(angle_val, cmap_for_emission_plot)
-                x_end = self.transducer_position[0] + ray_length * np.cos(angle_val)
-                y_end = self.transducer_position[1] + ray_length * np.sin(angle_val)
-                ax.plot([self.transducer_position[0], x_end], [self.transducer_position[1], y_end], '-', color=color,
-                        alpha=0.7, linewidth=1.0)
-            ax.set_xlim(-5, self.length + 5);
-            ax.set_ylim(-5, self.height + 5)
-            ax.set_xlabel('Length (mm)');
-            ax.set_ylabel('Height (mm)')
-            ax.set_title(title);
-            ax.set_aspect('equal');
-            ax.grid(True, linestyle='--', alpha=0.7)
-
-        plot_rays_on_ax(ax1, temp_angles_linear, f'Linear Dist. ({cmap_for_emission_plot.name})')
-        plot_rays_on_ax(ax2, temp_angles_gaussian, f'Gaussian Dist. ({cmap_for_emission_plot.name})')
-        fig.suptitle(f'Transducer Emission ({self.get_block_description()}, Symm. Angle Colored)',
-                     fontsize=16)  # Gewijzigd
-        from matplotlib.lines import Line2D
-        legend_elements = [Line2D([0], [0], color='lightgray', markerfacecolor='lightgray', marker='s', markersize=10,
-                                  label='Aluminum Block', alpha=0.3, linestyle='None'),
-                           Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10,
-                                  label='Transducer'),
-                           Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10,
-                                  label='Receiver'),
-                           Line2D([0], [0], color='gray', alpha=0.5, label='Sound Rays (Symm. Angle Colored)')]
-        fig.legend(handles=legend_elements, loc='lower center', ncol=4, bbox_to_anchor=(0.5, 0.02))
-        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
-        filename = f'transducer_emission_symm_angle_colored{filename_suffix}.png'
-        plt.savefig(filename, dpi=300);
-        plt.close()
-        return filename
-
+    # simulate_ray_paths blijft hetzelfde als in het vorige antwoord (met amplitude tracking)
     def simulate_ray_paths(self, use_gaussian=True):
-        # Ensure angles are generated before use, especially if transducer_angle_center changed
         angles = self.generate_emission_pattern(use_gaussian=use_gaussian)
-        ray_paths = []
-        for angle_idx, angle_val in enumerate(angles):  # angles is now self.initial_ray_angles
+        raw_ray_paths_with_amplitudes = []
+
+        for angle_val in angles:
             ray_pos = np.array(self.transducer_position, dtype=float)
             ray_dir = np.array([np.cos(angle_val), np.sin(angle_val)])
-            path = [tuple(ray_pos)]
+            current_amplitude = self.initial_amplitude
+            current_path_trace = [{'pos': tuple(ray_pos), 'amp': current_amplitude}]
+
             for bounce in range(self.max_bounces):
+                if current_amplitude < self.min_amplitude_cutoff:
+                    break
                 times_data = []
                 # Outer boundaries
                 if ray_dir[0] > self.epsilon:
@@ -239,39 +205,23 @@ class AluminumBlock:
                             if self.slot_y_bottom <= y_intersect <= self.slot_y_top:
                                 times_data.append(
                                     {'t': t_slot_rw, 'normal': np.array([1, 0]), 'type': 'slot_right_wall'})
-                    if ray_dir[
-                        1] > self.epsilon:  # Moet hier niet < -self.epsilon zijn voor de onderkant van de gleuf? Nee, > epsilon is correct, want y_bottom is kleiner dan y_top.
-                        # Echter, de intentie is een straal die naar beneden gaat (ray_dir[1] < 0) om de gleufbodem te raken.
-                        # Maar de code kijkt naar t_slot_bs = (self.slot_y_bottom - ray_pos[1]) / ray_dir[1]
-                        # Als ray_pos[1] > slot_y_bottom (boven de gleufbodem) en ray_dir[1] < 0 (naar beneden), dan is teller positief, noemer negatief -> t < 0 (fout)
-                        # Als ray_pos[1] < slot_y_bottom (onder de gleufbodem, niet mogelijk in deze context)
-                        # Moet zijn: als straal naar de gleufbodem beweegt.
-                        # if ray_pos[1] > self.slot_y_bottom and ray_dir[1] < -self.epsilon: # Ray is above slot bottom and moving downwards
-                        # Correctie: De check 'ray_dir[1] > self.epsilon' in combinatie met hoe t_slot_bs berekend wordt, is voor reflectie
-                        # tegen de ONDERKANT van de gleuf als de straal VAN ONDER komt (wat niet kan vanuit de transducer).
-                        # Voor een straal die VAN BOVEN komt en de gleufbodem raakt, moet ray_dir[1] < -self.epsilon (naar beneden gericht).
-                        # En ray_pos[1] moet groter zijn dan self.slot_y_bottom.
-                        # Dan wordt (self.slot_y_bottom - ray_pos[1]) negatief, ray_dir[1] negatief, dus t_slot_bs > 0. Dat is correct.
-                        pass  # De originele logica voor 'slot_bottom_surface' wordt hieronder behouden en lijkt te werken door de t > epsilon check.
-
-                    # Slot Bottom Surface (als straal naar beneden beweegt en boven de bodem is)
-                    if ray_dir[1] < -self.epsilon:  # Ray is moving downwards
+                    if ray_dir[1] < -self.epsilon:
                         t_slot_bs = (self.slot_y_bottom - ray_pos[1]) / ray_dir[1]
-                        if t_slot_bs > self.epsilon:  # Intersection time is positive
+                        if t_slot_bs > self.epsilon:
                             x_intersect = ray_pos[0] + t_slot_bs * ray_dir[0]
                             if self.slot_x_start <= x_intersect <= self.slot_x_end and ray_pos[
-                                1] > self.slot_y_bottom - self.epsilon:  # Ray must be above or at the slot bottom
+                                1] > self.slot_y_bottom - self.epsilon:
                                 times_data.append(
-                                    {'t': t_slot_bs, 'normal': np.array([0, 1]),
-                                     'type': 'slot_bottom_surface'})  # Normal points upwards
+                                    {'t': t_slot_bs, 'normal': np.array([0, 1]), 'type': 'slot_bottom_surface'})
 
                 if not times_data: break
                 times_data.sort(key=lambda x: x['t'])
                 t_min_data = times_data[0]
                 intersect_pos = ray_pos + t_min_data['t'] * ray_dir
-                path.append(tuple(intersect_pos))
+                current_path_trace.append({'pos': tuple(intersect_pos), 'amp': current_amplitude})
                 ray_dir = ray_dir - 2 * np.dot(ray_dir, t_min_data['normal']) * t_min_data['normal']
-                ray_pos = intersect_pos + ray_dir * self.epsilon  # Kleine stap om los te komen van oppervlak
+                ray_pos = intersect_pos + ray_dir * self.epsilon
+                current_amplitude *= self.reflection_loss_coefficient
 
                 exited_std = not (
                         0 - self.boundary_check_epsilon < ray_pos[0] < self.length + self.boundary_check_epsilon and \
@@ -279,229 +229,153 @@ class AluminumBlock:
                 exited_via_slot_top = False
                 if self.has_slot:
                     exited_via_slot_top = (self.slot_x_start - self.boundary_check_epsilon < ray_pos[
-                        0] < self.slot_x_end + self.boundary_check_epsilon and ray_pos[
-                                               1] > self.height - self.epsilon)  # Straal is in de gleufopening en boven het blok
+                        0] < self.slot_x_end + self.boundary_check_epsilon and \
+                                           ray_pos[1] > self.height - self.epsilon)
                 if exited_std or exited_via_slot_top:
-                    if exited_via_slot_top:  # Als de straal via de gleufopening ontsnapt, voeg het punt toe waar het de "bovenkant" van de gleuf raakt
-                        # Herbereken snijpunt met y = self.height als de straal naar boven ging
-                        if ray_dir[1] > self.epsilon:  # Als de straal inderdaad omhoog ging
-                            t_exit = (self.height - ray_pos[0]) / ray_dir[
-                                1]  # Foutje, moet (self.height - ray_pos[1]) zijn
-                            t_exit = (self.height - (intersect_pos[1] + ray_dir[1] * self.epsilon)) / ray_dir[
-                                1]  # Uitgaande van ray_pos net na reflectie
-
-                            # Herbereken intersect_pos als ray_pos net VOOR de kleine stap 'epsilon'
-                            prev_ray_pos = intersect_pos
-                            t_exit_slot = (self.height - prev_ray_pos[1]) / ray_dir[1]
-                            if t_exit_slot > 0:  # Enige zin als het voorwaarts in de tijd is
-                                exit_point = prev_ray_pos + t_exit_slot * ray_dir
-                                if self.slot_x_start < exit_point[
-                                    0] < self.slot_x_end:  # Controleer of het echt via de gleufopening is
-                                    # Verwijder het laatste 'epsilon step' punt als het buiten het blok is
-                                    if len(path) > 0 and (
-                                            path[-1][1] > self.height or path[-1][1] < 0 or path[-1][0] < 0 or path[-1][
-                                        0] > self.length):
-                                        if not (self.slot_x_start < path[-1][0] < self.slot_x_end and path[-1][
-                                            1] >= self.height - self.epsilon):
-                                            path.pop()
-                                    path.append(tuple(exit_point))
+                    if exited_via_slot_top:
+                        final_ray_start_pos = intersect_pos
+                        final_ray_dir = ray_dir
+                        if final_ray_dir[1] > self.epsilon:
+                            t_to_exit_height = (self.height - final_ray_start_pos[1]) / final_ray_dir[1]
+                            if t_to_exit_height > -self.epsilon:
+                                exit_point_on_height = final_ray_start_pos + max(0, t_to_exit_height) * final_ray_dir
+                                if self.slot_x_start - self.boundary_check_epsilon < exit_point_on_height[
+                                    0] < self.slot_x_end + self.boundary_check_epsilon:
+                                    current_path_trace.append(
+                                        {'pos': tuple(exit_point_on_height), 'amp': current_amplitude})
                     break
-            ray_paths.append(path)
-        return ray_paths
-
-    def plot_ray_paths(self, use_gaussian=True, filename_suffix="", chosen_cmap_name="cividis"):
-        # Ensure angles are set based on current transducer_angle_center
-        # self.generate_emission_pattern(use_gaussian=use_gaussian) # Wordt al in simulate_ray_paths gedaan
-        ray_paths = self.simulate_ray_paths(use_gaussian)  # self.initial_ray_angles wordt hier gezet/gebruikt
-
-        fig, ax = plt.subplots(figsize=(14, 6))
-        self._draw_block_with_slot(ax)
-        transducer_circle = plt.Circle(self.transducer_position, 2, color='blue', alpha=0.7);
-        ax.add_patch(transducer_circle)
-        receiver_circle = plt.Circle(self.receiver_position, 2, color='green', alpha=0.7);
-        ax.add_patch(receiver_circle)
-        cmap_for_paths = plt.get_cmap(chosen_cmap_name)
-
-        # Make sure self.initial_ray_angles is populated correctly if not already
-        if not self.initial_ray_angles:
-            self.generate_emission_pattern(use_gaussian=use_gaussian)
-
-        for i, path in enumerate(ray_paths):
-            if not path or i >= len(self.initial_ray_angles): continue
-            color = self._get_color_for_ray_symmetric_deviation(self.initial_ray_angles[i], cmap_for_paths)
-            x_coords = [point[0] for point in path];
-            y_coords = [point[1] for point in path]
-            ax.plot(x_coords, y_coords, '-', color=color, alpha=0.7, linewidth=1)
-            for j in range(1, len(path) - 1):  # -1 om het laatste (mogelijk exit) punt niet te plotten als reflectie
-                px, py = path[j]
-                is_on_valid_surface = False
-                # Check slot surfaces
-                if self.has_slot:
-                    on_slot_wall = ((abs(px - self.slot_x_start) < self.boundary_check_epsilon or abs(
-                        px - self.slot_x_end) < self.boundary_check_epsilon) and \
-                                    self.slot_y_bottom - self.boundary_check_epsilon <= py <= self.slot_y_top + self.boundary_check_epsilon)
-                    on_slot_bottom = (abs(py - self.slot_y_bottom) < self.boundary_check_epsilon and \
-                                      self.slot_x_start - self.boundary_check_epsilon <= px <= self.slot_x_end + self.boundary_check_epsilon)
-                    if on_slot_wall or on_slot_bottom: is_on_valid_surface = True
-
-                # Check outer block surfaces (excluding slot opening)
-                on_outer_non_slot_opening = False
-                if (abs(px - 0) < self.boundary_check_epsilon or \
-                        abs(px - self.length) < self.boundary_check_epsilon or \
-                        abs(py - 0) < self.boundary_check_epsilon or \
-                        abs(py - self.height) < self.boundary_check_epsilon):
-                    if self.has_slot and (
-                            self.slot_x_start - self.boundary_check_epsilon < px < self.slot_x_end + self.boundary_check_epsilon and abs(
-                            py - self.height) < self.boundary_check_epsilon):
-                        pass  # This is the slot opening, not a reflection surface
-                    else:
-                        on_outer_non_slot_opening = True
-
-                if on_outer_non_slot_opening: is_on_valid_surface = True
-
-                if is_on_valid_surface:
-                    ax.plot(px, py, 'o', color=color, markersize=3, alpha=0.5)
-
-        ax.set_xlim(-5, self.length + 5);
-        ax.set_ylim(-5, self.height + 5)
-        ax.set_xlabel('Length (mm)');
-        ax.set_ylabel('Height (mm)')
-        distribution_type = "Gaussian" if use_gaussian else "Linear"
-        ax.set_title(
-            f'Ray Paths ({self.get_block_description()}, Symm. Angle Col., {cmap_for_paths.name}, {distribution_type})')  # Gewijzigd
-        ax.set_aspect('equal');
-        ax.grid(True, linestyle='--', alpha=0.7)
-        from matplotlib.lines import Line2D
-        legend_elements = [Line2D([0], [0], color='lightgray', markerfacecolor='lightgray', marker='s', markersize=10,
-                                  label='Aluminum Block', alpha=0.3, linestyle='None'),
-                           Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10,
-                                  label='Transducer'),
-                           Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10,
-                                  label='Receiver'),
-                           Line2D([0], [0], color='gray', alpha=0.7, label='Sound Rays (Symm. Angle Col.)')]
-        ax.legend(handles=legend_elements, loc='upper right')
-        props_text = (f"Speed: {self.sound_speed} m/s\nFreq: {self.frequency / 1000} kHz\n"
-                      f"λ: {self.wavelength:.2f} mm\nRays: {self.num_rays}, Bounces: {self.max_bounces}")
-        if self.has_slot: props_text += f"\nSlot D: {self.slot_depth:.2f}mm"  # Gewijzigd
-        props_text += f"\nAngle: {self.transducer_angle_center}°"  # Gewijzigd
-        plt.figtext(0.02, 0.02, props_text, fontsize=9, bbox=dict(facecolor='white', alpha=0.7, boxstyle='round'))
-        plt.tight_layout()
-        filename = f'ray_paths_symm_angle_colored_{cmap_for_paths.name}_{distribution_type.lower()}{filename_suffix}.png'
-        plt.savefig(filename, dpi=300);
-        plt.close()
-        return filename
+            raw_ray_paths_with_amplitudes.append(current_path_trace)
+        return raw_ray_paths_with_amplitudes
 
     def create_animation_frames(self, frames_dir, use_gaussian=True, num_animation_frames=300, pulse_length_mm=30,
-                                chosen_cmap_name="cividis"):
-        # self.generate_emission_pattern(use_gaussian=use_gaussian) # Wordt al in simulate_ray_paths gedaan
-        ray_paths_raw = self.simulate_ray_paths(use_gaussian)  # self.initial_ray_angles wordt hier gezet/gebruikt
-        all_paths_data = []
+                                chosen_cmap_name="cividis_r"):  # NIEUW: standaard _r colormap
+        raw_ray_paths = self.simulate_ray_paths(use_gaussian)
+        all_paths_processed_data = []
         max_total_path_length_for_animation = 0.0
-        for path_points in ray_paths_raw:
-            if len(path_points) < 2:
-                all_paths_data.append(
-                    {'points': path_points, 'segment_lengths': [], 'total_length': 0.0, 'cumulative_lengths': [0.0]})
+
+        for path_trace in raw_ray_paths:
+            if len(path_trace) < 2:
+                all_paths_processed_data.append({
+                    'points_amps': path_trace, 'segment_lengths': [], 'segment_amplitudes': [],
+                    'total_length': 0.0, 'cumulative_lengths': [0.0]
+                })
                 continue
-            segment_lengths = [];
-            cumulative_lengths = [0.0];
+            segment_lengths = []
+            segment_amplitudes = []
+            cumulative_lengths = [0.0]
             current_total_length = 0.0
-            for i_seg in range(len(path_points) - 1):
-                p1, p2 = path_points[i_seg], path_points[i_seg + 1]
-                seg_len = self._distance(p1, p2)
-                segment_lengths.append(seg_len);
-                current_total_length += seg_len;
+            for i_seg in range(len(path_trace) - 1):
+                p1_dict, p2_dict = path_trace[i_seg], path_trace[i_seg + 1]
+                p1_pos, p1_amp = p1_dict['pos'], p1_dict['amp']
+                p2_pos = p2_dict['pos']
+                seg_len = self._distance(p1_pos, p2_pos)
+                segment_lengths.append(seg_len)
+                segment_amplitudes.append(p1_amp)
+                current_total_length += seg_len
                 cumulative_lengths.append(current_total_length)
-            all_paths_data.append(
-                {'points': path_points, 'segment_lengths': segment_lengths, 'total_length': current_total_length,
-                 'cumulative_lengths': cumulative_lengths})
-            if current_total_length > max_total_path_length_for_animation: max_total_path_length_for_animation = current_total_length
-        if max_total_path_length_for_animation < self.epsilon: max_total_path_length_for_animation = self.length  # Voorkom deling door nul
-        if max_total_path_length_for_animation == 0: max_total_path_length_for_animation = self.length  # Fallback
+            all_paths_processed_data.append({
+                'points_amps': path_trace, 'segment_lengths': segment_lengths,
+                'segment_amplitudes': segment_amplitudes, 'total_length': current_total_length,
+                'cumulative_lengths': cumulative_lengths
+            })
+            if current_total_length > max_total_path_length_for_animation:
+                max_total_path_length_for_animation = current_total_length
+        if max_total_path_length_for_animation < self.epsilon: max_total_path_length_for_animation = self.length
 
         frame_filenames = []
         effective_animation_length = max_total_path_length_for_animation + pulse_length_mm
         cmap_for_animation = plt.get_cmap(chosen_cmap_name)
 
-        # Make sure self.initial_ray_angles is populated correctly if not already
-        if not self.initial_ray_angles:
-            self.generate_emission_pattern(use_gaussian=use_gaussian)
-
         for frame_idx in tqdm(range(num_animation_frames), desc="Generating animation frames"):
             progress = (frame_idx + 1) / num_animation_frames
             head_distance = effective_animation_length * progress
             tail_distance = max(0, head_distance - pulse_length_mm)
-            fig, ax = plt.subplots(figsize=(14, 6))
+
+            # NIEUW: Figuur layout aangepast voor colorbar
+            fig, ax = plt.subplots(figsize=(14, 6))  # Kan iets breder/hoger nodig zijn
+            # fig.subplots_adjust(left=0.08, right=0.85, bottom=0.1, top=0.9) # Fine-tune voor ruimte
+
             self._draw_block_with_slot(ax)
             transducer_circle = plt.Circle(self.transducer_position, 2, color='blue', alpha=0.7);
             ax.add_patch(transducer_circle)
             receiver_circle = plt.Circle(self.receiver_position, 2, color='green', alpha=0.7);
             ax.add_patch(receiver_circle)
-            for i_path, path_data in enumerate(all_paths_data):
-                if i_path >= len(self.initial_ray_angles): continue  # Safety check
-                color = self._get_color_for_ray_symmetric_deviation(self.initial_ray_angles[i_path], cmap_for_animation)
-                original_path_points = path_data['points'];
-                segment_lengths = path_data['segment_lengths'];
+
+            for i_path, path_data in enumerate(all_paths_processed_data):
+                # ... (logica voor ophalen pad data blijft hetzelfde) ...
+                original_points_amps_list = path_data['points_amps']
+                segment_lengths = path_data['segment_lengths']
+                segment_amplitudes_for_path = path_data['segment_amplitudes']
                 cumulative_path_lengths = path_data['cumulative_lengths']
-                if not original_path_points or not segment_lengths: continue
+
+                if not original_points_amps_list or len(original_points_amps_list) < 2 or not segment_lengths:
+                    continue
+
+                pulse_head_amplitude = original_points_amps_list[0]['amp']  # Default
+                for seg_idx_head, _ in enumerate(segment_lengths):
+                    dist_to_seg_start = cumulative_path_lengths[seg_idx_head]
+                    dist_to_seg_end = cumulative_path_lengths[seg_idx_head + 1]
+                    if dist_to_seg_start <= head_distance < dist_to_seg_end:
+                        pulse_head_amplitude = segment_amplitudes_for_path[seg_idx_head]
+                        break
+                    elif head_distance >= dist_to_seg_end and seg_idx_head == len(segment_lengths) - 1:
+                        pulse_head_amplitude = segment_amplitudes_for_path[seg_idx_head]
+                        break
+
+                color_for_this_pulse_instance = self._get_color_for_amplitude(pulse_head_amplitude, cmap_for_animation)
+
+                # ... (logica voor visible_pulse_segment_points en tekenen van de puls blijft hetzelfde) ...
                 visible_pulse_segment_points = []
                 for seg_idx, seg_len in enumerate(segment_lengths):
-                    p_start_original, p_end_original = original_path_points[seg_idx], original_path_points[seg_idx + 1]
-                    dist_to_seg_start, dist_to_seg_end = cumulative_path_lengths[seg_idx], cumulative_path_lengths[
-                        seg_idx + 1]
-                    overlap_start_dist, overlap_end_dist = max(dist_to_seg_start, tail_distance), min(dist_to_seg_end,
-                                                                                                      head_distance)
-                    if overlap_start_dist < overlap_end_dist - self.epsilon:  # Kleine marge voor float vergelijkingen
-                        p_start_visible = p_start_original if abs(
-                            overlap_start_dist - dist_to_seg_start) < self.epsilon else \
-                            (p_start_original[0] + (
-                                (overlap_start_dist - dist_to_seg_start) / seg_len if seg_len > self.epsilon else 0) * (
-                                     p_end_original[0] - p_start_original[0]),
-                             p_start_original[1] + ((
-                                                            overlap_start_dist - dist_to_seg_start) / seg_len if seg_len > self.epsilon else 0) * (
-                                     p_end_original[1] - p_start_original[1]))
-                        p_end_visible = p_end_original if abs(overlap_end_dist - dist_to_seg_end) < self.epsilon else \
-                            (p_start_original[0] + (
-                                (overlap_end_dist - dist_to_seg_start) / seg_len if seg_len > self.epsilon else 1) * (
-                                     p_end_original[0] - p_start_original[0]),
-                             p_start_original[1] + (
-                                 (overlap_end_dist - dist_to_seg_start) / seg_len if seg_len > self.epsilon else 1) * (
-                                     p_end_original[1] - p_start_original[1]))
+                    p_start_dict = original_points_amps_list[seg_idx]
+                    p_end_dict = original_points_amps_list[seg_idx + 1]
+                    p_start_original, p_end_original = p_start_dict['pos'], p_end_dict['pos']
+                    dist_to_seg_start = cumulative_path_lengths[seg_idx]
+                    dist_to_seg_end = cumulative_path_lengths[seg_idx + 1]
+                    overlap_start_dist = max(dist_to_seg_start, tail_distance)
+                    overlap_end_dist = min(dist_to_seg_end, head_distance)
 
-                        # Voeg alleen toe als het segment lang genoeg is of als het het eerste punt is
-                        if not visible_pulse_segment_points or self._distance(visible_pulse_segment_points[-1],
-                                                                              p_start_visible) > self.epsilon * 10:
-                            if len(visible_pulse_segment_points) > 0 and self._distance(
-                                    visible_pulse_segment_points[-1], p_start_visible) < self.epsilon * 10:
-                                visible_pulse_segment_points.pop()  # vervang laatste punt als het te dichtbij is
+                    if overlap_start_dist < overlap_end_dist - self.epsilon:
+                        t_start_visible = (
+                                                      overlap_start_dist - dist_to_seg_start) / seg_len if seg_len > self.epsilon else 0
+                        t_end_visible = (
+                                                    overlap_end_dist - dist_to_seg_start) / seg_len if seg_len > self.epsilon else 1
+                        p_start_visible = (
+                            p_start_original[0] + t_start_visible * (p_end_original[0] - p_start_original[0]),
+                            p_start_original[1] + t_start_visible * (p_end_original[1] - p_start_original[1]))
+                        p_end_visible = (
+                            p_start_original[0] + t_end_visible * (p_end_original[0] - p_start_original[0]),
+                            p_start_original[1] + t_end_visible * (p_end_original[1] - p_start_original[1]))
+                        if not visible_pulse_segment_points or \
+                                (visible_pulse_segment_points and self._distance(visible_pulse_segment_points[-1],
+                                                                                 p_start_visible) > self.epsilon * 10):
+                            if visible_pulse_segment_points and self._distance(visible_pulse_segment_points[-1],
+                                                                               p_start_visible) < self.epsilon * 10:
+                                visible_pulse_segment_points.pop()
                             visible_pulse_segment_points.append(p_start_visible)
-
-                        # Zorg ervoor dat p_end_visible niet hetzelfde is als het laatst toegevoegde punt
                         if not visible_pulse_segment_points or self._distance(visible_pulse_segment_points[-1],
                                                                               p_end_visible) > self.epsilon:
                             visible_pulse_segment_points.append(p_end_visible)
-                        elif self._distance(p_start_visible,
-                                            p_end_visible) > self.epsilon:  # Als het startpunt anders was maar eindpunt hetzelfde, voeg toch eindpunt toe
+                        elif self._distance(p_start_visible, p_end_visible) > self.epsilon:
                             visible_pulse_segment_points.append(p_end_visible)
 
                 if len(visible_pulse_segment_points) >= 2:
-                    # Verwijder opeenvolgende duplicaten die door afronding kunnen ontstaan
                     final_visible_points = [visible_pulse_segment_points[0]]
                     for k_vp in range(1, len(visible_pulse_segment_points)):
                         if self._distance(final_visible_points[-1], visible_pulse_segment_points[k_vp]) > self.epsilon:
                             final_visible_points.append(visible_pulse_segment_points[k_vp])
-
                     if len(final_visible_points) >= 2:
-                        x_coords = [p[0] for p in final_visible_points];
+                        x_coords = [p[0] for p in final_visible_points]
                         y_coords = [p[1] for p in final_visible_points]
-                        ax.plot(x_coords, y_coords, '-', color=color, alpha=0.9, linewidth=1.5)
+                        ax.plot(x_coords, y_coords, '-', color=color_for_this_pulse_instance, alpha=0.9, linewidth=1.5)
 
-                # Plot reflectiepunten binnen de puls
-                for k_orig_path_idx in range(1,
-                                             len(original_path_points) - 1):  # -1 om exit punt niet als reflectie te zien
+                # ... (logica voor tekenen reflectiepunten blijft hetzelfde, maar gebruikt nu _get_color_for_amplitude) ...
+                for k_orig_path_idx in range(1, len(original_points_amps_list)):
+                    reflection_point_dict = original_points_amps_list[k_orig_path_idx]
+                    px, py = reflection_point_dict['pos']
+                    amplitude_at_reflection = reflection_point_dict['amp']
                     dist_to_reflection_point = cumulative_path_lengths[k_orig_path_idx]
                     if tail_distance - self.epsilon <= dist_to_reflection_point <= head_distance + self.epsilon:
-                        px, py = original_path_points[k_orig_path_idx]
-
                         is_on_valid_surface_anim = False
                         if self.has_slot:
                             on_slot_wall_anim = ((abs(px - self.slot_x_start) < self.boundary_check_epsilon or abs(
@@ -510,7 +384,6 @@ class AluminumBlock:
                             on_slot_bottom_anim = (abs(py - self.slot_y_bottom) < self.boundary_check_epsilon and \
                                                    self.slot_x_start - self.boundary_check_epsilon <= px <= self.slot_x_end + self.boundary_check_epsilon)
                             if on_slot_wall_anim or on_slot_bottom_anim: is_on_valid_surface_anim = True
-
                         on_outer_non_slot_opening_anim = False
                         if (abs(px - 0) < self.boundary_check_epsilon or \
                                 abs(px - self.length) < self.boundary_check_epsilon or \
@@ -523,33 +396,56 @@ class AluminumBlock:
                             else:
                                 on_outer_non_slot_opening_anim = True
                         if on_outer_non_slot_opening_anim: is_on_valid_surface_anim = True
-
                         if is_on_valid_surface_anim:
-                            ax.plot(px, py, 'o', color=color, markersize=4, alpha=0.9)
-                    elif dist_to_reflection_point > head_distance + self.epsilon:  # Als we voorbij de kop van de puls zijn voor dit pad
+                            color_refl_pt = self._get_color_for_amplitude(amplitude_at_reflection, cmap_for_animation)
+                            ax.plot(px, py, 'o', color=color_refl_pt, markersize=4, alpha=0.9)
+                    elif dist_to_reflection_point > head_distance + self.epsilon and k_orig_path_idx > 0:
                         break
 
             ax.set_xlim(-5, self.length + 5);
             ax.set_ylim(-5, self.height + 5)
             ax.set_xlabel('Length (mm)');
             ax.set_ylabel('Height (mm)')
-            distribution_type = "Gaussian" if use_gaussian else "Linear"
             ax.set_title(
-                f'Pulse ({self.get_block_description()}, Symm. Angle Col., {cmap_for_animation.name}, Fr {frame_idx + 1}/{num_animation_frames})')  # Gewijzigd
+                f'Pulse Animation ({self.get_block_description()}, Energy Col., Fr {frame_idx + 1}/{num_animation_frames})')  # Titel aangepast
             ax.set_aspect('equal');
             ax.grid(True, linestyle='--', alpha=0.7)
+
+            # NIEUW: Colorbar toevoegen
+            norm = plt.Normalize(vmin=0, vmax=self.initial_amplitude)
+            sm = plt.cm.ScalarMappable(cmap=cmap_for_animation, norm=norm)
+            sm.set_array([])  # Je moet een dummy array setten voor de colorbar
+
+            # Manier 1: colorbar direct aan de ax koppelen (kan layout soms verstoren)
+            # divider = make_axes_locatable(ax)
+            # cax = divider.append_axes("right", size="5%", pad=0.1)
+            # cbar = fig.colorbar(sm, cax=cax, label='Relatieve Energie (Amplitude)')
+
+            # Manier 2: fig.colorbar met fraction en pad (vaak makkelijker voor simpele gevallen)
+            cbar = fig.colorbar(sm, ax=ax, orientation='vertical', label='Relatieve Energie (Amplitude)',
+                                fraction=0.046, pad=0.04)
+            # Als de colormap "inferno_r" is, mapt 0 (lage energie) naar lichtgeel en 1 (hoge energie) naar donkerpaars.
+            # De colorbar zal dit correct weergeven.
+
             from matplotlib.lines import Line2D
-            legend_elements = [
+            legend_elements = [  # Legenda is nu minder cruciaal voor kleur, colorbar is leidend
                 Line2D([0], [0], color='lightgray', markerfacecolor='lightgray', marker='s', markersize=10,
                        label='Aluminum Block', alpha=0.3, linestyle='None'),
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Transducer'),
-                Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Receiver')]
-            ax.legend(handles=legend_elements, loc='upper right')
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Receiver'),
+            ]
+            ax.legend(handles=legend_elements, loc='upper left', fontsize='small')  # Verplaatst naar upper left
+
             props_text_anim = (
-                f"Pulse Head: {head_distance:.1f} mm\nPulse Tail: {tail_distance:.1f} mm\nPulse Len: {pulse_length_mm} mm")
-            plt.figtext(0.02, 0.02, props_text_anim, fontsize=9,
+                f"Pulse Head: {head_distance:.1f} mm\nPulse Tail: {tail_distance:.1f} mm\nPulse Len: {pulse_length_mm} mm\n"
+                f"Color: Energy (Dark=High, Light=Low)\nLoss/bounce: {(1 - self.reflection_loss_coefficient) * 100:.0f}%"
+            # Aangepast
+            )
+            plt.figtext(0.75, 0.02, props_text_anim, fontsize=9,  # Aangepaste positie figtext
                         bbox=dict(facecolor='white', alpha=0.7, boxstyle='round'))
-            plt.tight_layout()
+
+            plt.tight_layout(rect=[0, 0, 0.95, 1])  # rect aangepast om ruimte te maken voor colorbar/figtext
+
             frame_filename = os.path.join(frames_dir, f'frame_{frame_idx:04d}.png')
             plt.savefig(frame_filename, dpi=150);
             plt.close(fig)
@@ -557,148 +453,134 @@ class AluminumBlock:
         return frame_filenames
 
 
+# create_gif_from_frames blijft hetzelfde
 def create_gif_from_frames(frame_filenames, gif_filename, duration_per_frame):
     images = []
-    for filename in tqdm(sorted(frame_filenames), desc="Compiling GIF"):  # Sorteer voor de zekerheid
+    for filename in tqdm(sorted(frame_filenames), desc="Compiling GIF"):
         images.append(imageio.imread(filename))
     imageio.mimsave(gif_filename, images, duration=duration_per_frame, loop=0)
     print(f"Animation saved as: {gif_filename}")
 
 
+# visualize_colormap_application moet ook de nieuwe conventie reflecteren
 def visualize_colormap_application(block_instance, colormap_names,
-                                   filename="colormap_visualization.png"):
+                                   filename="colormap_energy_visualization.png"):  # Naam aangepast
     num_colormaps = len(colormap_names)
-    fig, axes = plt.subplots(1, num_colormaps, figsize=(5 * num_colormaps, 5), squeeze=False);
+    fig, axes = plt.subplots(num_colormaps, 1, figsize=(6, 2 * num_colormaps), squeeze=False)  # Iets breder
     axes = axes.flatten()
-    num_vis_rays = 50
-    # Gebruik de instellingen van het meegegeven block_instance
-    center_rad = np.radians(block_instance.transducer_angle_center)
-    spread_rad = np.radians(block_instance.transducer_angle_spread)
-    vis_angles = np.linspace(center_rad - spread_rad, center_rad + spread_rad, num_vis_rays)
-    ray_vis_length = 10
+
+    # Amplitudes van hoog (initial) naar laag (na een paar bounces, of min_cutoff)
+    amplitudes_to_vis = np.linspace(block_instance.initial_amplitude,
+                                    max(block_instance.min_amplitude_cutoff,
+                                        block_instance.initial_amplitude * (
+                                                    block_instance.reflection_loss_coefficient ** 5)),
+                                    256)  # 256 stappen voor een vloeiende balk
+    amplitudes_to_vis = np.clip(amplitudes_to_vis, 0, block_instance.initial_amplitude)
+    # Sorteer van lage naar hoge amplitude voor de balk, zodat het overeenkomt met colorbar orientatie
+    amplitudes_to_vis_sorted = np.sort(amplitudes_to_vis)
+
     for i, cmap_name in enumerate(colormap_names):
         ax = axes[i]
         try:
-            colormap = plt.get_cmap(cmap_name)
+            colormap = plt.get_cmap(cmap_name)  # Hier wordt de _r versie meegegeven vanuit main
         except ValueError:
-            print(f"Colormap '{cmap_name}' niet gevonden.");
             ax.set_title(f"'{cmap_name}' (X)");
-            ax.axis(
-                'off');
+            ax.axis('off');
             continue
-        for angle_rad in vis_angles:
-            color = block_instance._get_color_for_ray_symmetric_deviation(angle_rad, colormap)
-            x_start, y_start = 0, 0  # Relatief ten opzichte van de transducer voor visualisatie
-            x_end = x_start + ray_vis_length * np.cos(angle_rad - center_rad)  # Normaliseer voor visualisatie rond 0
-            y_end = y_start + ray_vis_length * np.sin(angle_rad - center_rad)  # Normaliseer voor visualisatie rond 0
-            ax.plot([x_start, x_end], [y_start, y_end], color=color, linewidth=2)
-        ax.set_title(cmap_name);
-        ax.set_aspect('equal')
-        # Pas limieten aan voor genormaliseerde weergave
-        ax.set_xlim(-ray_vis_length * np.cos(np.radians(0) - spread_rad) - 1,
-                    ray_vis_length * np.cos(np.radians(0) - spread_rad) + 1)
-        ax.set_ylim(-ray_vis_length - 1, ray_vis_length + 1)
-        ax.axis('off')
-    plt.tight_layout();
-    plt.savefig(filename, dpi=150);
+
+        # Maak een colorbar-achtige visualisatie
+        norm = plt.Normalize(vmin=0, vmax=block_instance.initial_amplitude)
+        # Gebruik imshow voor een continue balk
+        bar = ax.imshow(np.vstack((amplitudes_to_vis_sorted, amplitudes_to_vis_sorted)).T,  # .T voor verticale balk
+                        cmap=colormap, norm=norm, aspect='auto', extent=[0, 1, 0, block_instance.initial_amplitude])
+
+        ax.set_title(f"{cmap_name} (Energy Mapping)")
+        ax.set_xlabel("Color Gradient")
+        ax.set_xticks([])
+        ax.set_ylabel("Relatieve Energie (Amplitude)")
+        fig.colorbar(bar, ax=ax, orientation='vertical', label='Energie (Amplitude)')
+
+    plt.suptitle(
+        f"Energy to Color Mapping (Dark=High, Light=Low)\nRefl.Loss: {(1 - block_instance.reflection_loss_coefficient) * 100:.0f}%/bounce",
+        fontsize=14)
+    plt.tight_layout(rect=[0, 0, 1, 0.94])  # Ruimte voor suptitle
+    plt.savefig(filename, dpi=150)
     plt.close(fig)
-    print(f"Colormap visualisatie opgeslagen als: {filename}")
+    print(f"Energy colormap visualisatie opgeslagen als: {filename}")
 
 
 if __name__ == "__main__":
-    # --- Configuratie ---
-    chosen_colormap = "inferno"  # Kies je favoriete colormap
+    # NIEUW: Gebruik een "_r" (reversed) colormap. "inferno_r" gaat van donkerpaars (hoge waarde) naar geel (lage waarde).
+    chosen_colormap = "inferno_r"
 
-    # Optioneel: Visualiseer colormaps om een goede keuze te maken
-    # Dit kan handig zijn om eenmalig te draaien of als je een andere colormap overweegt.
-    # Voor reguliere runs kun je dit blok uitcommentariëren.
-    # print("Visualizing colormaps...")
-    # temp_block_for_vis = AluminumBlock(transducer_angle_center_param=0)
-    # colormaps_to_visualize = ["viridis", "plasma", "magma", "cividis", "Blues", "Greens", "Reds", "inferno", "coolwarm", "bwr"]
-    # visualize_colormap_application(temp_block_for_vis, colormaps_to_visualize, filename="colormap_visualization_selection.png")
-    # del temp_block_for_vis
-    # print("Colormap visualization saved.")
+    REFLECTION_LOSS = 0.015  # 20% verlies per reflectie (was 0.15)
+    MIN_AMPLITUDE = 0.05
 
-    # --- Definieer de specifieke simulaties die je wilt uitvoeren ---
-    # Elke tuple in de lijst is: (transducer_hoek_graden, gleuf_diepte_mm)
-    # gleuf_diepte_mm = 0 betekent geen gleuf.
+    print("Visualizing colormaps for energy (dark=high, light=low)...")
+    temp_block_for_amp_vis = AluminumBlock(
+        reflection_loss_coeff_param=(1 - REFLECTION_LOSS),
+        min_amplitude_cutoff_param=MIN_AMPLITUDE
+    )
+    # Geef de _r versie mee voor visualisatie
+    colormaps_to_visualize = ["viridis_r", "plasma_r", "magma_r", "cividis_r", "inferno_r", "coolwarm_r", "Oranges",
+                              "Blues"]
+    visualize_colormap_application(temp_block_for_amp_vis, colormaps_to_visualize)
+    del temp_block_for_amp_vis
 
     simulations_to_run = [
-        # Voorbeeld 1: Transducer recht (0 graden) met verschillende gleufdieptes
-        (0, 0),  # Hoek 0 graden, geen gleuf
-        (0, 5.0),  # Hoek 0 graden, 5mm diepe gleuf
-        (0, 15.0),  # Hoek 0 graden, 15mm diepe gleuf
-
-        # Voorbeeld 2: Transducer onder een hoek (bijv. 10 graden) voor een blok zonder gleuf
-        (10, 0),  # Hoek 10 graden, geen gleuf
-
-        # Voorbeeld 3: Transducer onder een negatieve hoek (bijv. -5 graden, dus naar beneden gericht)
-        # met een standaard gleufdiepte.
-        #(-5, 8.25),  # Hoek -5 graden, 8.25mm diepe gleuf
-
-        # Voeg hier meer (hoek, diepte) combinaties toe zoals gewenst:
-        # (HOEK_IN_GRADEN, GLEUF_DIEPTE_IN_MM),
+        (0, 0),
+        #(0, 8.25),  # Standaard gleufdiepte
+        # (0, 15.0),
+        # (10, 0),
+        # (-5, 8.25),
     ]
 
-    # --- Voer de gespecificeerde simulaties uit ---
     for angle_deg, depth_mm in simulations_to_run:
-        has_slot_current = depth_mm > 1e-6  # Gebruik een kleine tolerantie i.p.v. strict > 0
-
-        # De slot_depth_param wordt alleen gebruikt als has_slot_current True is.
+        has_slot_current = depth_mm > 1e-6
         current_slot_depth_param = depth_mm
 
-        # Maak een label voor de bestandsnamen
         simulation_base_label = f"Angle{angle_deg}deg_Slot"
         if has_slot_current:
-            simulation_base_label += f"{depth_mm:.2f}mm"  # Gebruik 2 decimalen voor consistentie
+            simulation_base_label += f"{depth_mm:.2f}mm"
         else:
             simulation_base_label += "None"
+        simulation_base_label += f"_Loss{(REFLECTION_LOSS) * 100:.0f}pct_EnergyCol"  # Toevoeging aan label
 
-        # Vervang ongeldige karakters in bestandsnamen (zoals '-' en '.')
         filename_friendly_label = simulation_base_label.replace('-', 'neg').replace('.', 'pt')
 
         print(f"\n--- STARTING SIMULATION: {simulation_base_label} ---")
 
-        # Maak de AluminumBlock instantie met de huidige parameters
         block_instance = AluminumBlock(
             has_slot_param=has_slot_current,
             slot_depth_param=current_slot_depth_param,
-            transducer_angle_center_param=angle_deg
+            transducer_angle_center_param=angle_deg,
+            reflection_loss_coeff_param=(1.0 - REFLECTION_LOSS),
+            min_amplitude_cutoff_param=MIN_AMPLITUDE
         )
 
-        # Definieer de suffix voor de bestandsnamen voor deze specifieke simulatie
         filename_suffix = f"_{filename_friendly_label}"
 
-        # 1. Plot Geometrie (de "initial setup" afbeelding)
-        # Deze afbeelding laat zien hoe het blok en de transducer geconfigureerd zijn.
         geometry_filename = block_instance.plot_geometry(filename_suffix=filename_suffix)
         print(f"  Generated Geometry Plot: {geometry_filename}")
 
-        # De statische plot_emission_pattern() en plot_ray_paths() worden overgeslagen,
-        # zoals per je verzoek om alleen de geometrie-afbeelding en de GIF te hebben.
+        # Gebruik de gekozen (reversed) colormap voor de animatie
+        animation_filename = f'anim_ENERGY{filename_suffix}_cmap_{chosen_colormap}_gauss.gif'
 
-        # 2. Creëer Animatie GIF (de "where it goes to" animatie)
-        # Deze animatie toont de voortplanting van de geluidspuls.
-        animation_filename = f'anim{filename_suffix}_symm_{chosen_colormap}_gauss.gif'
-
-        # Gebruik een tijdelijke map voor de frames van de animatie
         with tempfile.TemporaryDirectory() as tmpdir:
             print(f"  Generating animation frames for '{animation_filename}' (frames in: {tmpdir})")
-
-            # Parameters voor de animatie (kunnen per simulatie aangepast worden indien nodig)
-            num_frames_for_anim = 250  # Aantal frames in de GIF
-            pulse_len_for_anim = 30  # Lengte van de gesimuleerde puls in mm
+            num_frames_for_anim = 500  # Minder frames voor snellere test
+            pulse_len_for_anim = 25
 
             frame_files = block_instance.create_animation_frames(
                 frames_dir=tmpdir,
-                use_gaussian=True,  # Gebruik Gaussische verdeling voor de stralen
+                use_gaussian=True,
                 num_animation_frames=num_frames_for_anim,
                 pulse_length_mm=pulse_len_for_anim,
-                chosen_cmap_name=chosen_colormap
+                chosen_cmap_name=chosen_colormap  # Hier de reversed colormap
             )
 
-            if frame_files:  # Alleen als er frames zijn gegenereerd
-                create_gif_from_frames(frame_files, animation_filename, duration_per_frame=0.1)  # 0.1 seconde per frame
+            if frame_files:
+                create_gif_from_frames(frame_files, animation_filename, duration_per_frame=0.07)
             else:
                 print(f"  Skipping GIF creation for {animation_filename} as no frames were generated.")
 

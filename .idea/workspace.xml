@@ -4,10 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="golf simuleren">
-      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Pulse_Trough_PIN31_Both_Boards.py" afterDir="false" />
+    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="data folder metingen">
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/common_plot_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_explain_exp_trend.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_individual_run_periodogram.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_periodogram_analysis_steps.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_post_peak_periodogram.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_raw.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_summary.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_threshold.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/plotting_master.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/plotting_multiple_runs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/simulation/km.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/test_pulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/test_pulse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/aluminum_block_simulation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/ploting_2_board_data.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/ploting_2_board_data.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/plotting_master.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/plotting_multiple_runs.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/simulation/aluminiun_block_gleuf_simulation.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/simulation/aluminiun_block_gleuf_simulation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +39,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="visualise_sound" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -46,7 +60,6 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2tWhM7BXsMkqI3e3aXwFgDv7tQc" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -64,6 +77,12 @@
     "Python.Test_Reset.executor": "Run",
     "Python.Test_using_code_instead_of_button.executor": "Run",
     "Python.ToF.executor": "Run",
+    "Python.aluminiun_block_gleuf_simulation.executor": "Run",
+    "Python.aluminum_block_simulation.executor": "Run",
+    "Python.huygens.executor": "Run",
+    "Python.plot_explain_exp_trend.executor": "Run",
+    "Python.plot_periodogram_analysis_steps.executor": "Run",
+    "Python.plotting_master.executor": "Run",
     "Python.read_DC_values.executor": "Run",
     "Python.real_time_data.executor": "Run",
     "Python.receive_data_on-off.executor": "Run",
@@ -72,8 +91,8 @@
     "Python.tuss44x0-controller.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "1-board-pulse",
-    "last_opened_file_path": "C:/Users/q.koelman/PycharmProjects/TUSS4440/TUSS4440",
+    "git-widget-placeholder": "Rework__Plotting",
+    "last_opened_file_path": "C:/Users/q.koelman/PycharmProjects/TUSS4440/TUSS4440/Codes",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -85,18 +104,20 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\q.koelman\PycharmProjects\TUSS4440\TUSS4440\Codes" />
       <recent name="C:\Users\q.koelman\PycharmProjects\TUSS4440\TUSS4440" />
       <recent name="C:\Users\q.koelman\PycharmProjects\TUSS4440" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\q.koelman\PycharmProjects\TUSS4440\TUSS4440\Codes\Plotting" />
       <recent name="C:\Users\q.koelman\PycharmProjects\TUSS4440\TUSS4440\Codes" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-PY-243.23654.177" />
-        <option value="bundled-python-sdk-91d3a02ef49d-43b77aa2d136-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.23654.177" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
+        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
       </set>
     </attachedChunks>
   </component>
@@ -120,6 +141,10 @@
       <workItem from="1741852890005" duration="1181000" />
       <workItem from="1741868994743" duration="5772000" />
       <workItem from="1744708930550" duration="15516000" />
+      <workItem from="1747638596189" duration="22909000" />
+      <workItem from="1748264083928" duration="1637000" />
+      <workItem from="1749047957121" duration="2162000" />
+      <workItem from="1749109005229" duration="13937000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Push">
       <option name="closed" value="true" />
@@ -177,7 +202,39 @@
       <option name="project" value="LOCAL" />
       <updated>1741617017398</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Updated plotting master file, and also added a simulation, or better said visualisation of the block.">
+      <option name="closed" value="true" />
+      <created>1747658288408</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1747658288408</updated>
+    </task>
+    <task id="LOCAL-00009" summary="aluminiun_block_gleuf_simulation.py geupdate met nieuwe kleuren en een gleuf nu">
+      <option name="closed" value="true" />
+      <created>1747664411673</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1747664411673</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Newest_plot">
+      <option name="closed" value="true" />
+      <created>1749049319995</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1749049319995</updated>
+    </task>
+    <task id="LOCAL-00011" summary="data folder metingen">
+      <option name="closed" value="true" />
+      <created>1749049701439</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1749049701439</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -202,27 +259,37 @@
     <MESSAGE value="Een code waarmee ik met de ToF firmware kan &quot;praten&quot;. Kan commands sturen via de terminal en laat de response zien." />
     <MESSAGE value="Code seems to work, where it can sent a Pulse or Receive depending on what the python code sends." />
     <MESSAGE value="The test_pulse.py can now either read the data or sent a pulse." />
-    <option name="LAST_COMMIT_MESSAGE" value="The test_pulse.py can now either read the data or sent a pulse." />
+    <MESSAGE value="Updated plotting master file, and also added a simulation, or better said visualisation of the block." />
+    <MESSAGE value="aluminiun_block_gleuf_simulation.py geupdate met nieuwe kleuren en een gleuf nu" />
+    <MESSAGE value="Newest_plot" />
+    <MESSAGE value="data folder metingen" />
+    <option name="LAST_COMMIT_MESSAGE" value="data folder metingen" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/TUSS4440$Test_Reset.coverage" NAME="Test_Reset Coverage Results" MODIFIED="1741615456621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
     <SUITE FILE_PATH="coverage/TUSS4440$new.coverage" NAME="new Coverage Results" MODIFIED="1740745890118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
-    <SUITE FILE_PATH="coverage/TUSS4440$test_pulse.coverage" NAME="test_pulse Coverage Results" MODIFIED="1744365903360" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/TUSS4440$read_DC_values.coverage" NAME="read_DC_values Coverage Results" MODIFIED="1740491958745" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/TUSS4440$receive_data_on_off.coverage" NAME="receive_data_on-off Coverage Results" MODIFIED="1741254645664" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Sending_pulse_or_receiving.coverage" NAME="Sending_pulse_or_receiving Coverage Results" MODIFIED="1741251346406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
-    <SUITE FILE_PATH="coverage/TUSS4440$ToF.coverage" NAME="ToF Coverage Results" MODIFIED="1744719290111" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
-    <SUITE FILE_PATH="coverage/TUSS4440$tuss44x0_controller.coverage" NAME="tuss44x0-controller Coverage Results" MODIFIED="1740478070302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/TUSS4440$test_snc.coverage" NAME="test_snc Coverage Results" MODIFIED="1741879362361" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Test_using_code_instead_of_button.coverage" NAME="Test_using_code_instead_of_button Coverage Results" MODIFIED="1744363733063" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Examening_Data.coverage" NAME="Examening_Data Coverage Results" MODIFIED="1741253765542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Receive_or_sent_2_boards.coverage" NAME="Receive_or_sent_2_boards Coverage Results" MODIFIED="1741619913302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/TUSS4440$real_time_data.coverage" NAME="real_time_data Coverage Results" MODIFIED="1741253718519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
-    <SUITE FILE_PATH="coverage/TUSS4440$fourier_analysis.coverage" NAME="fourier-analysis Coverage Results" MODIFIED="1740746349893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Test_Different_Pulses.coverage" NAME="Test_Different_Pulses Coverage Results" MODIFIED="1741689064362" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Pulse_Trough_PIN31_Both_Boards.coverage" NAME="Pulse_Trough_PIN31_Both_Boards Coverage Results" MODIFIED="1744731168140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/TUSS4440$Check_receiver.coverage" NAME="Check_receiver Coverage Results" MODIFIED="1741767824754" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
     <SUITE FILE_PATH="coverage/TUSS4440$ultrasonic_plots.coverage" NAME="ultrasonic-plots Coverage Results" MODIFIED="1740740473493" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/PvA" />
+    <SUITE FILE_PATH="coverage/TUSS4440$read_DC_values.coverage" NAME="read_DC_values Coverage Results" MODIFIED="1740491958745" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Sending_pulse_or_receiving.coverage" NAME="Sending_pulse_or_receiving Coverage Results" MODIFIED="1741251346406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Test_using_code_instead_of_button.coverage" NAME="Test_using_code_instead_of_button Coverage Results" MODIFIED="1744363733063" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$plot_periodogram_analysis_steps.coverage" NAME="plot_periodogram_analysis_steps Coverage Results" MODIFIED="1749116237549" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$plotting_master.coverage" NAME="plotting_master Coverage Results" MODIFIED="1749124310902" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes/Plotting" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Check_receiver.coverage" NAME="Check_receiver Coverage Results" MODIFIED="1741767824754" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$test_snc.coverage" NAME="test_snc Coverage Results" MODIFIED="1741879362361" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
     <SUITE FILE_PATH="coverage/TUSS4440$ADC_values_single_sensor.coverage" NAME="ADC_values_single_sensor Coverage Results" MODIFIED="1741175453511" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Test_Reset.coverage" NAME="Test_Reset Coverage Results" MODIFIED="1741615456621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$huygens.coverage" NAME="huygens Coverage Results" MODIFIED="1748265157184" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes/simulation" />
+    <SUITE FILE_PATH="coverage/TUSS4440$ToF.coverage" NAME="ToF Coverage Results" MODIFIED="1744719290111" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Pulse_Trough_PIN31_Both_Boards.coverage" NAME="Pulse_Trough_PIN31_Both_Boards Coverage Results" MODIFIED="1744731168140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$aluminum_block_simulation.coverage" NAME="aluminum_block_simulation Coverage Results" MODIFIED="1747658025545" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Examening_Data.coverage" NAME="Examening_Data Coverage Results" MODIFIED="1741253765542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$fourier_analysis.coverage" NAME="fourier-analysis Coverage Results" MODIFIED="1740746349893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$aluminiun_block_gleuf_simulation.coverage" NAME="aluminiun_block_gleuf_simulation Coverage Results" MODIFIED="1747725451483" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes/simulation" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Receive_or_sent_2_boards.coverage" NAME="Receive_or_sent_2_boards Coverage Results" MODIFIED="1741619913302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$receive_data_on_off.coverage" NAME="receive_data_on-off Coverage Results" MODIFIED="1741254645664" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$real_time_data.coverage" NAME="real_time_data Coverage Results" MODIFIED="1741253718519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
+    <SUITE FILE_PATH="coverage/TUSS4440$plot_explain_exp_trend.coverage" NAME="plot_explain_exp_trend Coverage Results" MODIFIED="1749117200124" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$tuss44x0_controller.coverage" NAME="tuss44x0-controller Coverage Results" MODIFIED="1740478070302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/TUSS4440$test_pulse.coverage" NAME="test_pulse Coverage Results" MODIFIED="1744365903360" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
+    <SUITE FILE_PATH="coverage/TUSS4440$Test_Different_Pulses.coverage" NAME="Test_Different_Pulses Coverage Results" MODIFIED="1741689064362" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
   </component>
 </project>
