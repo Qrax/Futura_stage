@@ -17,16 +17,19 @@ Modules for each plot mode are in the 'Plot_Modes' subfolder.
 # ---------------- PLOTMODUS – Select modes to run -----------------
 PLOT_MODES_TO_RUN = [
     # "RAW",
-    # "THRESHOLD",
-    "SUMMARY",
+    "THRESHOLD",
+    # "SUMMARY",
     # "DIFFERENCE", # Nog niet geïmplementeerd als module
     # "DEVIATION_FROM_LINEAR", # Nog niet geïmplementeerd als module
     # "FFT_OF_DEVIATION", # Nog niet geïmplementeerd als module
     "POST_PEAK_PERIODOGRAM",
     # "INDIVIDUAL_RUN_PERIOD
     # OGRAM",
-    "PERIODOGRAM_ANALYSIS_STEPS",
+    # "PERIODOGRAM_ANALYSIS_STEPS",
     # "EXPLAIN_EXP_TREND"
+    "VARIABILITY_TABLE",          # Voeg deze toe voor de tabel
+    "PEAK_PROMINENCE",            # Voeg deze toe voor de bar chart
+    "RUN_CONSISTENCY_HEATMAP",    # Voeg deze toe voor de heatmaps
 ]
 
 # ----------------------------------------------------------------
@@ -39,15 +42,27 @@ _CSV_BASE_FILES = [
     "al_0mm_3ms-final_meta_1.csv", "al_0mm_3ms_final_meta_2.csv",
     "AL_5mm_meta_1.csv", "AL_5mm_meta_2.csv",
     #"al_10mm_final_meta_1.csv", "al_10mm_final_meta_2.csv",
-    "al_10mm_retry_meta_1.csv", "al_10mm_retry_meta_2.csv",
+    # "al_10mm_retry_meta_1.csv", "al_10mm_retry_meta_2.csv",
     "al_15mm_last_meta_1.csv", "al_15mm_last_meta_2.csv",
+
+    # "g10_0mm_final_meta_2.csv", "g10_0mm_final2_meta_1.csv",
+    # "G10_5mm_meta_1.csv", "G10_5mm_meta_2.csv",
+    # #"g10_10mm_meta_1.csv", "g10_10mm_meta_2.csv",
+    # "G10_15mm_fina_meta_1.csv", "G10_15mm_fina_meta_2.csv",
 ]
+
+
 # --- MODIFIED: Labels voor 8 metingen (duplicatie gecorrigeerd) ---
 LABELS = [
-    "Meting 1 (Defectloos)", "Meting 2 (Defectloos)",
-    "Meting 1 (5mm)", "Meting 2 (5mm)",
-    "Meting 1 (10mm)", "Meting 2 (10mm)",
-    "Meting 1 (15mm)", "Meting 2 (15mm)",
+    "AL Meting 1 (Defectloos)", "AL Meting 2 (Defectloos)",
+    "AL Meting 1 (5mm)", "AL Meting 2 (5mm)",
+    # "G10 Meting 1 (10mm)", "AL Meting 2 (10mm)",
+    "AL Meting 1 (15mm)", "AL Meting 2 (15mm)",
+
+    # "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)",
+    # "G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)",
+    # # "G10 Meting 1 (10mm)", "Meting 2 (10mm)",
+    # "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)",
 ]
 
 CSV_FILES = [os.path.join(TARGET_DATA_SUBFOLDER, fname.strip()) for fname in
@@ -64,16 +79,16 @@ WINDOW_BEFORE = 0
 # --- NEW: Dynamic Window Settings ---
 USE_DYNAMIC_WINDOW_END = False
 END_THRESH = 900
-MAX_WINDOW_AFTER = 2000
+MAX_WINDOW_AFTER = 1500
 
 POST_PEAK_OFFSET_SAMPLES = 20
-FIT_WINDOW_POST_PEAK = 1400
+FIT_WINDOW_POST_PEAK = 1500
 
 DETREND_PERIODOGRAM = True
 DETREND_TYPE = "linear"  # "linear", "exponential", "none"
 
 MIN_PERIOD_PLOT = 2
-MAX_PERIOD_PLOT_ABS = 400
+MAX_PERIOD_PLOT_ABS = 280
 APPLY_FFT_WINDOW = False
 TIME_UNIT = "us"
 MAX_POINTS = None

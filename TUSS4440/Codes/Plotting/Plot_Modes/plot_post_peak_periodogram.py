@@ -1,4 +1,3 @@
-
 # Plot_Modes/plot_post_peak_periodogram.py
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,8 +7,12 @@ def generate_plot_post_peak_periodogram(dfs, act_lbls, settings, sum_cache, plt_
     """
     Generates the POST_PEAK_PERIODOGRAM plot.
     This calculates the periodogram on the MEAN TRACE of each file.
+    This version creates two plots: one with a linear y-axis and one with a logarithmic y-axis.
     """
-    fig_pg_mean, ax_pg_mean = plt_instance.subplots(figsize=(12, 7))
+    # Create two figures: one for linear scale, one for log scale
+    fig_lin, ax_lin = plt_instance.subplots(figsize=(12, 7))
+    fig_log, ax_log = plt_instance.subplots(figsize=(12, 7))
+
     any_pg_mean_plot = False
     min_p_us = settings.MIN_PERIOD_PLOT * settings.SAMPLE_TIME_DELTA_US
     max_p_us = settings.MAX_PERIOD_PLOT_ABS * settings.SAMPLE_TIME_DELTA_US
@@ -50,30 +53,46 @@ def generate_plot_post_peak_periodogram(dfs, act_lbls, settings, sum_cache, plt_
         if plot_p_mean is not None and len(plot_p_mean) > 0:
             current_label = f"{lbl_pg_mean} (N={N})"
             # MODIFIED: Thicker, solid lines for clarity
-            ax_pg_mean.plot(plot_p_mean, plot_m_mean, lw=2.5, color=c, linestyle='-',
-                            label=current_label)
+            # Plot on both linear and log axes
+            ax_lin.plot(plot_p_mean, plot_m_mean, lw=2.5, color=c, linestyle='-',
+                        label=current_label)
+            ax_log.plot(plot_p_mean, plot_m_mean, lw=2.5, color=c, linestyle='-',
+                        label=current_label)
             any_pg_mean_plot = True
 
     if any_pg_mean_plot:
         # MODIFIED: Cleaner title and labels for thesis
         processing_str = ', '.join(global_steps_for_title_mean) if global_steps_for_title_mean else "None"
-        title = (
+        base_title = (
             f"Periodogram of Mean Signal Traces\n"
             f"Post-Peak Segment (Offset: {settings.POST_PEAK_OFFSET_SAMPLES} samp, "
             f"Length: {settings.FIT_WINDOW_POST_PEAK} samp) | Processing: {processing_str}"
         )
-        ax_pg_mean.set_title(title, pad=20)
 
-        ax_pg_mean.set_xlabel(f"Period ({settings.tu_raw_lbl})")
-        ax_pg_mean.set_ylabel("FFT Magnitude")
-        ax_pg_mean.grid(True, which="both", ls="--", alpha=0.5)
-        ax_pg_mean.legend(title="Source Measurement")
-        ax_pg_mean.set_xlim(left=min_p_us, right=max_p_us)
+        # --- Configure Linear Plot ---
+        ax_lin.set_title(base_title, pad=20)
+        ax_lin.set_xlabel(f"Period ({settings.tu_raw_lbl})")
+        ax_lin.set_ylabel("FFT Magnitude")
+        ax_lin.grid(True, which="both", ls="--", alpha=0.5)
+        ax_lin.legend(title="Source Measurement")
+        ax_lin.set_xlim(left=min_p_us, right=max_p_us)
+        fig_lin.tight_layout()
+        fig_lin.canvas.manager.set_window_title(f"Plot: Periodogram of Mean Traces (Linear) - {settings.DEVICE_FILTER}")
 
-        fig_pg_mean.tight_layout()
-        fig_pg_mean.canvas.manager.set_window_title(f"Plot: Periodogram of Mean Traces - {settings.DEVICE_FILTER}")
-        return fig_pg_mean
+        # --- Configure Log Plot ---
+        ax_log.set_title(base_title, pad=20)
+        ax_log.set_xlabel(f"Period ({settings.tu_raw_lbl})")
+        ax_log.set_ylabel("FFT Magnitude (log scale)")
+        ax_log.set_yscale('log')  # Set y-axis to log scale
+        ax_log.grid(True, which="both", ls="--", alpha=0.5)
+        ax_log.legend(title="Source Measurement")
+        ax_log.set_xlim(left=min_p_us, right=max_p_us)
+        fig_log.tight_layout()
+        fig_log.canvas.manager.set_window_title(f"Plot: Periodogram of Mean Traces (Log) - {settings.DEVICE_FILTER}")
+
+        return [fig_lin, fig_log]
     else:
-        plt_instance.close(fig_pg_mean)
+        plt_instance.close(fig_lin)
+        plt_instance.close(fig_log)
         print("W(POST_PEAK_PERIODOGRAM): No periodograms of mean traces were plotted.")
         return None
