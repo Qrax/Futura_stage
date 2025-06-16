@@ -1,81 +1,89 @@
-# --- START OF FILE Plot_Modes/plot_summary.py ---
+# Sla dit op als: Plot_Modes/plot_summary.py
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import t  # For confidence intervals
+from scipy.stats import t
+
+
+# Helper functie om de SEM te berekenen (Standard Error of the Mean)
+def calculate_sem(std_dev, n):
+    if n > 1:
+        return std_dev / np.sqrt(n)
+    return np.zeros_like(std_dev)
 
 
 def generate_plot_summary(dfs, act_lbls, settings, sum_cache, plt_instance):
     """
-    Generates the SUMMARY plot (mean traces with CI/PI).
-    Handles both fixed and dynamic window lengths.
+    Genereert de SUMMARY plot (gemiddelde traces met CI en PI).
+    Compatibel met profiel-gebaseerde aanpak.
     """
-    mean_trace_data_exists = any(
-        label in sum_cache and sum_cache[label].get("N_for_mean", 0) > 0 for label in act_lbls
-    )
-
-    if not mean_trace_data_exists:
-        print("W(SUMMARY):No mean trace data found in sum_cache for any file.")
-        return None
-
-    fig_s, ax_s = plt_instance.subplots(figsize=(12, 7))
+    fig_s, ax_s = plt_instance.subplots(figsize=(8, 6))
     any_summary_plotted = False
 
+    defect_metingen = []
+    defectloos_metingen = []
+
     for i, lbl_s in enumerate(act_lbls):
-        if lbl_s in sum_cache:
-            cache_s = sum_cache[lbl_s]
-            mt_s = cache_s.get("mean_trace")
-            N_s = cache_s.get("N_for_mean", 0)
-            sem_s = cache_s.get("sem_trace")
-            std_s = cache_s.get("std_trace")
+        if 'Defectloos' in lbl_s:
+            defectloos_metingen.append((i, lbl_s))
+        else:
+            defect_metingen.append((i, lbl_s))
 
-            if not (N_s and N_s > 0 and mt_s is not None and len(mt_s) > 0):
-                continue
+    # Definieer een herbruikbare plot-functie om herhaling te voorkomen
+    def plot_trace(index, label):
+        nonlocal any_summary_plotted  # Zorg dat we de buitenste variabele kunnen aanpassen
+        cache_s = sum_cache.get(label, {})
+        mt_s = cache_s.get("mean_trace")
+        N_s = cache_s.get("N_for_mean", 0)
+        std_s = cache_s.get("std_trace")
 
-            num_points_in_trace = len(mt_s)
-            time_axis = np.arange(-settings.WINDOW_BEFORE, num_points_in_trace - settings.WINDOW_BEFORE) * settings.SAMPLE_TIME_DELTA_US
+        if not (N_s and N_s > 0 and mt_s is not None and len(mt_s) > 0):
+            return
 
-            any_summary_plotted = True
-            c = settings.PLOT_COLORS[i % len(settings.PLOT_COLORS)]
-            ls = settings.PLOT_LINESTYLES[i % len(settings.PLOT_LINESTYLES)]
+        any_summary_plotted = True
+        num_points_in_trace = len(mt_s)
 
-            # --- MODIFIED 1: Only label the main line, and use the simple label ---
-            # This is the ONLY item that will appear in the legend.
-            ax_s.plot(time_axis, mt_s, lw=2.5, color=c, linestyle=ls, label=lbl_s)
+        # De `WINDOW_BEFORE` instelling uit `plotting_master.py` bepaalt het startpunt.
+        start_sample_index = -settings.WINDOW_BEFORE
+        end_sample_index = num_points_in_trace - settings.WINDOW_BEFORE
 
-            if N_s > 1:
-                tcrit = t.ppf(0.975, df=N_s - 1)
+        # Maak een as die van negatief (vóór trigger) naar positief (na trigger) loopt.
+        time_axis = np.arange(start_sample_index, end_sample_index) * settings.SAMPLE_TIME_DELTA_US
 
-                # --- MODIFIED 2: Remove the 'label' argument from fill_between ---
-                # This prevents the CI and PI from creating their own legend entries.
-                if sem_s is not None and len(sem_s) == num_points_in_trace:
-                    ci_m = tcrit * sem_s
-                    ax_s.fill_between(time_axis, mt_s - ci_m, mt_s + ci_m, alpha=0.35, color=c)
+        c = settings.PLOT_COLORS[index % len(settings.PLOT_COLORS)]
 
-                if std_s is not None and len(std_s) == num_points_in_trace:
-                    pi_m = tcrit * std_s * np.sqrt(1 + 1 / N_s)
-                    ax_s.fill_between(time_axis, mt_s - pi_m, mt_s + pi_m, alpha=0.15, color=c)
+        # Plot de gemiddelde lijn, deze krijgt het label voor de legenda
+        ax_s.plot(time_axis, mt_s, lw=3, color=c, label=label, zorder=10 if 'Defectloos' in label else 5)
 
+        # Toon de variabiliteit met 95% CI en PI
+        if N_s > 1 and std_s is not None and len(std_s) == num_points_in_trace:
+            tcrit = t.ppf(0.975, df=N_s - 1)
+
+            # Confidence Interval
+            sem_s = calculate_sem(std_s, N_s)
+            ci_margin = tcrit * sem_s
+            ax_s.fill_between(time_axis, mt_s - ci_margin, mt_s + ci_margin, alpha=0.35, color=c, label=f'_nolegend_')
+
+            # Prediction Interval
+            pi_margin = tcrit * std_s * np.sqrt(1 + 1 / N_s)
+            ax_s.fill_between(time_axis, mt_s - pi_margin, mt_s + pi_margin, alpha=0.15, color=c, label=f'_nolegend_')
+
+    # STAP 1: Teken eerst alle metingen MET een defect
+    for index, label in defect_metingen:
+        plot_trace(index, label)
+
+    # STAP 2: Teken daarna alle metingen ZONDER defect (deze komen bovenop)
+    for index, label in defectloos_metingen:
+        plot_trace(index, label)
     if any_summary_plotted:
-        ax_s.set_xlabel(f"Time Relative to Trigger ({settings.tu_raw_lbl})")
-        ax_s.set_ylabel(f"Voltage ({'ADC' if settings.adc_to_v(1) == 1 else 'V'})")
-
-        # Your simplified title
-        title_str = "Mean Signal Traces ± 95% CI & PI"
-        ax_s.set_title(title_str, pad=20)
-
+        ax_s.set_xlabel(f"Tijd relatief tot Trigger [{settings.tu_raw_lbl}]")
+        # Dit repareert de crash:
+        ax_s.set_ylabel("Voltage [ADC]")
+        ax_s.set_title("Gemiddelde Signaal Traces ± 95% CI & PI")
         ax_s.grid(True, which='both', linestyle='--', alpha=0.5)
-
-        # --- MODIFIED 3: Replace the entire complex legend logic with one simple line ---
-        # This automatically finds all items that were given a 'label' and creates a clean legend.
         ax_s.legend(title="Metingen")
-
         fig_s.tight_layout()
-        fig_s.canvas.manager.set_window_title(f"Plot:SUMMARY - {settings.DEVICE_FILTER}")
         return fig_s
     else:
         plt_instance.close(fig_s)
-        print("W(SUMMARY):No valid mean trace data to plot from any file.")
         return None
-
-# --- END OF FILE plot_summary.py ---
