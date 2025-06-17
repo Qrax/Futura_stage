@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="Started working on some new plots">
-      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_post_peak_periodogram_v2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_post_peak_periodogram_v3.py" afterDir="false" />
+    <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="Changed plot stuff, idk what">
+      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_appendix_figures.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_peak_prominence.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_peak_prominence.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_post_peak_periodogram.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_post_peak_periodogram.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_run_consistency_heatmap.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_run_consistency_heatmap.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_summary.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_summary.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/plotting_master.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/plotting_master.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -142,7 +137,9 @@
       <workItem from="1749047957121" duration="2162000" />
       <workItem from="1749109005229" duration="35733000" />
       <workItem from="1749766368991" duration="1361000" />
-      <workItem from="1750109007591" duration="337000" />
+      <workItem from="1750109007591" duration="745000" />
+      <workItem from="1750191647348" duration="717000" />
+      <workItem from="1750194986144" duration="2591000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Push">
       <option name="closed" value="true" />
@@ -248,7 +245,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749596709946</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Changed plot stuff, idk what">
+      <option name="closed" value="true" />
+      <created>1750109368495</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1750109368495</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -279,7 +284,8 @@
     <MESSAGE value="data folder metingen" />
     <MESSAGE value="Alle plot modussen nu in andere folder." />
     <MESSAGE value="Started working on some new plots" />
-    <option name="LAST_COMMIT_MESSAGE" value="Started working on some new plots" />
+    <MESSAGE value="Changed plot stuff, idk what" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed plot stuff, idk what" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TUSS4440$read_DC_values.coverage" NAME="read_DC_values Coverage Results" MODIFIED="1740491958745" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -302,7 +308,7 @@
     <SUITE FILE_PATH="coverage/TUSS4440$Pulse_Trough_PIN31_Both_Boards.coverage" NAME="Pulse_Trough_PIN31_Both_Boards Coverage Results" MODIFIED="1744731168140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
     <SUITE FILE_PATH="coverage/TUSS4440$new.coverage" NAME="new Coverage Results" MODIFIED="1740745890118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$test_pulse.coverage" NAME="test_pulse Coverage Results" MODIFIED="1744365903360" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes" />
-    <SUITE FILE_PATH="coverage/Futura_stage$plotting_master.coverage" NAME="plotting_master Coverage Results" MODIFIED="1749768267537" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes/Plotting" />
+    <SUITE FILE_PATH="coverage/Futura_stage$plotting_master.coverage" NAME="plotting_master Coverage Results" MODIFIED="1750197419733" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440/Codes/Plotting" />
     <SUITE FILE_PATH="coverage/TUSS4440$tuss44x0_controller.coverage" NAME="tuss44x0-controller Coverage Results" MODIFIED="1740478070302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TUSS4440$ADC_values_single_sensor.coverage" NAME="ADC_values_single_sensor Coverage Results" MODIFIED="1741175453511" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TUSS4440" />
     <SUITE FILE_PATH="coverage/TUSS4440$ultrasonic_plots.coverage" NAME="ultrasonic-plots Coverage Results" MODIFIED="1740740473493" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/PvA" />
