@@ -15,8 +15,8 @@ NIEUW: Implementeert analyseprofielen om verschillende instellingen per materiaa
 
 # ---------------- PLOTMODUS – Select modes to run -----------------
 PLOT_MODES_TO_RUN = [
-    # "RAW",
-    # "THRESHOLD",
+    #"RAW",
+    "THRESHOLD",
     "SUMMARY",
     #"THRESHOLD",
     # "SUMMARY",
@@ -24,11 +24,11 @@ PLOT_MODES_TO_RUN = [
     # "DEVIATION_FROM_LINEAR", # Nog niet geïmplementeerd als module
     # "FFT_OF_DEVIATION", # Nog niet geïmplementeerd als module
     "POST_PEAK_PERIODOGRAM",
-    "INDIVIDUAL_RUN_PERIODOGRAM",
+    # "INDIVIDUAL_RUN_PERIODOGRAM",
     #"PERIODOGRAM_ANALYSIS_STEPS",
     # "PERIODOGRAM_ANALYSIS_STEPS",
     # "EXPLAIN_EXP_TREND"
-    "VARIABILITY_TABLE",          # Voeg deze toe voor de tabel
+    # "VARIABILITY_TABLE",          # Voeg deze toe voor de tabel
     #"PEAK_PROMINENCE",            # Voeg deze toe voor de bar chart
     #"RUN_CONSISTENCY_HEATMAP",    # Voeg deze toe voor de heatmaps
 ]
@@ -40,23 +40,23 @@ ANALYSIS_PROFILES = {
     'aluminium': {
         'DESCRIPTION': 'Settings for Aluminium samples',
         'THRESH': 1500,
-        'MAX_WINDOW_AFTER': 2000,
+        'MAX_WINDOW_AFTER': 1400,
         'DETREND_TYPE': 'exponential',
-        'MAX_PERIOD_PLOT_US': 1800,  # Aangepaste maximale periode in µs
+        'MAX_PERIOD_PLOT_US': 1200,  # Aangepaste maximale periode in µs
     },
     'g10': {
         'DESCRIPTION': 'Settings for G10 composite samples',
         'THRESH': 1000,
-        'MAX_WINDOW_AFTER': 600,
+        'MAX_WINDOW_AFTER': 500,
         'DETREND_TYPE': 'exponential',
         'MAX_PERIOD_PLOT_US': 300,  # Aangepaste maximale periode in µs
     },
     'default': {  # Een fallback voor als bestandsnaam niet matcht
         'DESCRIPTION': 'Default settings',
         'THRESH': 1500,
-        'MAX_WINDOW_AFTER': 1000,
-        'DETREND_TYPE': 'linear',
-        'MAX_PERIOD_PLOT_US': 500,
+        'MAX_WINDOW_AFTER': 2000,
+        'DETREND_TYPE': 'exponential',
+        'MAX_PERIOD_PLOT_US': 300,
     }
 }
 # ----------------------------------------------------------------
@@ -67,23 +67,27 @@ SAMPLE_TIME_DELTA_US = 4.63
 
 _CSV_BASE_FILES = [
     # Aluminium
-    "al_0mm_3ms-final_meta_1.csv", "al_0mm_3ms_final_meta_2.csv",
-    "AL_5mm_meta_1.csv", "AL_5mm_meta_2.csv",
-    "al_15mm_last_meta_1.csv", "al_15mm_last_meta_2.csv",
+    #"al_0mm_please_meta_3.csv", "al_0mm_please_meta_2.csv", "al_0mm_laatste_metingen_meta_1.csv", "al_0mm_laatste_metingen_meta_3.csv", "al_0mm_laatste_metingen_meta_4.csv",
+    "al_5mm_5_metingen_meta_1.csv", "al_5mm_5_metingen_meta_2.csv", "al_5mm_5_metingen_meta_3.csv", "al_5mm_5_metingen_meta_4.csv", "al_5mm_5_metingen_meta_5.csv",
+    # "al_15mm_please_meta_1.csv", "al_15mm_please_meta_2.csv", "al_15mm_please_meta_3.csv", "al_15mm_please_meta_4.csv", "al_15mm_please_meta_5.csv",
+
+    #"al_15mm_ff_opnieuw_meta_1.csv", "al_15mm_ff_opnieuw_meta_2.csv", "al_15mm_ff_opnieuw_meta_3.csv", "al_15mm_ff_opnieuw_meta_4.csv", "al_15mm_ff_opnieuw_meta_5.csv",
     # G10
-    # "g10_0mm_final_meta_2.csv", "g10_0mm_final2_meta_1.csv",
-    # "G10_5mm_meta_1.csv", "G10_5mm_meta_2.csv",
-    # "G10_15mm_fina_meta_1.csv", "G10_15mm_fina_meta_2.csv",
+    #"g10_0mm_3e_test_meta_1.csv", "g10_0mm_3e_test_meta_2.csv", "g10_0mm_3e_test_meta_3.csv", "g10_0mm_3e_test_meta_4.csv", "g10_0mm_3e_test_meta_5.csv",
+    #"g10_5mm_5_metingen_meta_1.csv", "g10_5mm_5_metingen_meta_2.csv", "g10_5mm_5_metingen_meta_3.csv", "g10_5mm_5_metingen_meta_4.csv", "g10_5mm_5_metingen_meta_5.csv",
+    #"g10_15mm_5_metingen_meta_1.csv", "g10_15mm_5_metingen_meta_2.csv", "g10_15mm_5_metingen_meta_3.csv", "g10_15mm_5_metingen_meta_4.csv", "g10_15mm_5_metingen_meta_5.csv"
 ]
 LABELS = [
     # Aluminium
-    # "AL Meting 1 (Defectloos)", "AL Meting 2 (Defectloos)",
-    # "AL Meting 1 (5mm)", "AL Meting 2 (5mm)",
-    # "AL Meting 1 (15mm)", "AL Meting 2 (15mm)",
+
+    #AL Meting 1 (Defectloos)", "AL Meting 2 (Defectloos)", "AL Meting 3 (Defectloos)", "AL Meting 4 (Defectloos)","AL Meting 5 (Defectloos)",#, "AL Meting 6 (Defectloos)", "AL Meting 7 (Defectloos)", "AL meting 8 (defectloos)"
+    "AL Meting 1 (5mm)", "AL Meting 2 (5mm)", "AL Meting 3 (5mm)", "AL Meting 4 (5mm)", "AL Meting 5 (5mm)",
+    # "AL Meting 1 (15mm)", "AL Meting 2 (15mm)", "AL Meting 3 (15mm)", "AL Meting 4 (15mm)", "AL Meting 5 (15mm)",
+    #"AL Meting 1 (15mm)", "AL Meting 2 (15mm)", "AL Meting 3 (15mm)", "AL Meting 4 (15mm)", "AL Meting 5 (15mm)",
     # G10
-    "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)",
-    "G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)",
-    "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)",
+   # "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)", "G10 Meting 3 (Defectloos)", "G10 Meting 4 (Defectloos)", "G10 Meting 5 (Defectloos)",
+    #"G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)", "G10 Meting 3 (5mm)", "G10 Meting 4 (5mm)", "G10 Meting 5 (5mm)",
+   # "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)", "G10 Meting 3 (15mm)", "G10 Meting 4 (15mm)", "G10 Meting 5 (15mm)",
 ]
 
 CSV_FILES = [os.path.join(TARGET_DATA_SUBFOLDER, fname.strip()) for fname in _CSV_BASE_FILES]
@@ -95,7 +99,7 @@ MAX_RUNS = 100
 # --- Overige instellingen (de meeste zijn nu per profiel gedefinieerd) ---
 WINDOW_BEFORE = 50
 POST_PEAK_OFFSET_SAMPLES = 20
-FIT_WINDOW_POST_PEAK = 1400  # Dit kan nog steeds globaal zijn
+FIT_WINDOW_POST_PEAK = 2000  # Dit kan nog steeds globaal zijn
 DETREND_PERIODOGRAM = True
 APPLY_FFT_WINDOW = False
 TIME_UNIT = "us"
@@ -112,7 +116,7 @@ if THESIS_MODE:
         'figure.titlesize': 24    # Hoofdtitel van de figuur (suptitle)
     })
 
-PLOT_COLORS = plt.get_cmap('tab20').colors
+PLOT_COLORS = plt.get_cmap('Set1').colors
 PLOT_LINESTYLES = ['-']
 
 
