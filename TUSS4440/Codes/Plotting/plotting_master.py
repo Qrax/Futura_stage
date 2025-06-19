@@ -28,7 +28,7 @@ PLOT_MODES_TO_RUN = [
     # "VARIABILITY_TABLE",          # Voeg deze toe voor de tabel
     # "PEAK_PROMINENCE",            # Voeg deze toe voor de bar chart
     # "RUN_CONSISTENCY_HEATMAP",    # Voeg deze toe voor de heatmaps
-    #"appendix_figures"
+    "appendix_figures"
     # "PEAK_AMPLITUDE_BOXPLOT",
 ]
 
