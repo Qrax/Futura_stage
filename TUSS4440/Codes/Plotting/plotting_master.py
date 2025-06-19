@@ -15,22 +15,21 @@ NIEUW: Implementeert analyseprofielen om verschillende instellingen per materiaa
 
 # ---------------- PLOTMODUS – Select modes to run -----------------
 PLOT_MODES_TO_RUN = [
-    # "RAW",
-    # "THRESHOLD",
-    "SUMMARY",
+    "RAW",
     #"THRESHOLD",
     # "SUMMARY",
     # "DIFFERENCE", # Nog niet geïmplementeerd als module
     # "DEVIATION_FROM_LINEAR", # Nog niet geïmplementeerd als module
     # "FFT_OF_DEVIATION", # Nog niet geïmplementeerd als module
-    "POST_PEAK_PERIODOGRAM",
-    "INDIVIDUAL_RUN_PERIODOGRAM",
-    #"PERIODOGRAM_ANALYSIS_STEPS",
+    # "POST_PEAK_PERIODOGRAM",
+    # "INDIVIDUAL_RUN_PERIODOGRAM",
     # "PERIODOGRAM_ANALYSIS_STEPS",
     # "EXPLAIN_EXP_TREND"
-    "VARIABILITY_TABLE",          # Voeg deze toe voor de tabel
-    #"PEAK_PROMINENCE",            # Voeg deze toe voor de bar chart
-    #"RUN_CONSISTENCY_HEATMAP",    # Voeg deze toe voor de heatmaps
+    # "VARIABILITY_TABLE",          # Voeg deze toe voor de tabel
+    # "PEAK_PROMINENCE",            # Voeg deze toe voor de bar chart
+    # "RUN_CONSISTENCY_HEATMAP",    # Voeg deze toe voor de heatmaps
+    # "appendix_figures"
+    # "PEAK_AMPLITUDE_BOXPLOT",
 ]
 
 # ----------------------------------------------------------------
@@ -47,9 +46,9 @@ ANALYSIS_PROFILES = {
     'g10': {
         'DESCRIPTION': 'Settings for G10 composite samples',
         'THRESH': 1000,
-        'MAX_WINDOW_AFTER': 600,
+        'MAX_WINDOW_AFTER': 450,
         'DETREND_TYPE': 'exponential',
-        'MAX_PERIOD_PLOT_US': 300,  # Aangepaste maximale periode in µs
+        'MAX_PERIOD_PLOT_US': 600,  # Aangepaste maximale periode in µs
     },
     'default': {  # Een fallback voor als bestandsnaam niet matcht
         'DESCRIPTION': 'Default settings',
@@ -67,23 +66,25 @@ SAMPLE_TIME_DELTA_US = 4.63
 
 _CSV_BASE_FILES = [
     # Aluminium
-    "al_0mm_3ms-final_meta_1.csv", "al_0mm_3ms_final_meta_2.csv",
-    "AL_5mm_meta_1.csv", "AL_5mm_meta_2.csv",
-    "al_15mm_last_meta_1.csv", "al_15mm_last_meta_2.csv",
+    "al_0mm_please_meta_3.csv", "al_0mm_please_meta_2.csv", "al_0mm_laatste_metingen_meta_1.csv", "al_0mm_laatste_metingen_meta_3.csv", "al_0mm_laatste_metingen_meta_4.csv",
+   "al_5mm_5_metingen_meta_1.csv", "al_5mm_5_metingen_meta_2.csv", "al_5mm_5_metingen_meta_3.csv", "al_5mm_5_metingen_meta_4.csv", "al_5mm_5_metingen_meta_5.csv",
+    "al_15mm_please_meta_1.csv", "al_15mm_please_meta_2.csv", "al_15mm_please_meta_3.csv", "al_15mm_please_meta_4.csv", "al_15mm_please_meta_5.csv",
+
     # G10
-    # "g10_0mm_final_meta_2.csv", "g10_0mm_final2_meta_1.csv",
-    # "G10_5mm_meta_1.csv", "G10_5mm_meta_2.csv",
-    # "G10_15mm_fina_meta_1.csv", "G10_15mm_fina_meta_2.csv",
+    "g10_0mm_3e_test_meta_1.csv", "g10_0mm_3e_test_meta_2.csv", "g10_0mm_3e_test_meta_3.csv", "g10_0mm_3e_test_meta_4.csv", "g10_0mm_3e_test_meta_5.csv",
+    "g10_5mm_final_meta_1.csv", "g10_5mm_5_metingen_meta_2.csv", "g10_5mm_5_metingen_meta_3.csv", "g10_5mm_5_metingen_meta_4.csv", "g10_5mm_5_metingen_meta_5.csv",
+    "g10_15mm_5_metingen_meta_1.csv", "g10_15mm_5_metingen_meta_2.csv", "g10_15mm_5_metingen_meta_3.csv", "g10_15mm_5_metingen_meta_4.csv", "g10_15mm_5_metingen_meta_5.csv"
 ]
 LABELS = [
     # Aluminium
-    # "AL Meting 1 (Defectloos)", "AL Meting 2 (Defectloos)",
-    # "AL Meting 1 (5mm)", "AL Meting 2 (5mm)",
-    # "AL Meting 1 (15mm)", "AL Meting 2 (15mm)",
+
+    "AL Meting 1 (Defectloos)", "AL Meting 2 (Defectloos)", "AL Meting 3 (Defectloos)", "AL Meting 4 (Defectloos)","AL Meting 5 (Defectloos)",#, "AL Meting 6 (Defectloos)", "AL Meting 7 (Defectloos)", "AL meting 8 (defectloos)"
+    "AL Meting 1 (5mm)", "AL Meting 2 (5mm)", "AL Meting 3 (5mm)", "AL Meting 4 (5mm)", "AL Meting 5 (5mm)",
+    "AL Meting 1 (15mm)", "AL Meting 2 (15mm)", "AL Meting 3 (15mm)", "AL Meting 4 (15mm)", "AL Meting 5 (15mm)",
     # G10
-    "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)",
-    "G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)",
-    "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)",
+   "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)", "G10 Meting 3 (Defectloos)", "G10 Meting 4 (Defectloos)", "G10 Meting 5 (Defectloos)",
+    "G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)", "G10 Meting 3 (5mm)", "G10 Meting 4 (5mm)", "G10 Meting 5 (5mm)",
+    "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)", "G10 Meting 3 (15mm)", "G10 Meting 4 (15mm)", "G10 Meting 5 (15mm)",
 ]
 
 CSV_FILES = [os.path.join(TARGET_DATA_SUBFOLDER, fname.strip()) for fname in _CSV_BASE_FILES]
@@ -91,52 +92,74 @@ if len(CSV_FILES) != len(LABELS): raise ValueError("Mismatch CSV_FILES/LABELS.")
 
 DEVICE_FILTER = "Master"
 MAX_RUNS = 100
+MAX_POINTS = None
 
 # --- Overige instellingen (de meeste zijn nu per profiel gedefinieerd) ---
 WINDOW_BEFORE = 50
 POST_PEAK_OFFSET_SAMPLES = 20
-FIT_WINDOW_POST_PEAK = 1400  # Dit kan nog steeds globaal zijn
+FIT_WINDOW_POST_PEAK = 1400
 DETREND_PERIODOGRAM = True
 APPLY_FFT_WINDOW = False
 TIME_UNIT = "us"
 
+
+def adc_to_v(adc_val):
+    """Placeholder function for ADC to Voltage conversion."""
+    return adc_val
+
+
 THESIS_MODE = True
 if THESIS_MODE:
     plt.rcParams.update({
-        'font.size': 18,          # Algemene tekstgrootte
-        'axes.titlesize': 22,     # Titel van de plot
-        'axes.labelsize': 20,     # Labels van de X- en Y-as
-        'xtick.labelsize': 16,    # Getallen op de X-as
-        'ytick.labelsize': 16,    # Getallen op de Y-as
-        'legend.fontsize': 16,    # Tekst in de legenda
-        'figure.titlesize': 24    # Hoofdtitel van de figuur (suptitle)
+        'font.size': 18,
+        'axes.titlesize': 22,
+        'axes.labelsize': 20,
+        'xtick.labelsize': 16,
+        'ytick.labelsize': 16,
+        'legend.fontsize': 16,
+        'figure.titlesize': 24
     })
 
-PLOT_COLORS = plt.get_cmap('tab20').colors
+PLOT_COLORS = plt.get_cmap('Set1').colors
 PLOT_LINESTYLES = ['-']
 
 
-# --- NIEUW: Helper functie om profiel te bepalen ---
 def get_profile_key_for_file(filename):
     fn_lower = filename.lower()
-    # Zoek eerst naar de meest specifieke term om foute matches te voorkomen
-    if 'g10' in fn_lower:
-        return 'g10'
-    if 'al_' in fn_lower or 'alu' in fn_lower:
-        return 'aluminium'
+    if 'g10' in fn_lower: return 'g10'
+    if 'al_' in fn_lower or 'alu' in fn_lower: return 'aluminium'
     return 'default'
 
 
 # --- Core Helper Functions (aangepast waar nodig) ---
-def load_and_prepare_data_main(csv_f, dev_filter):
+def load_and_prepare_data_main(csv_f, dev_filter, settings):  # <--- MODIFIED: Accepts settings
+    """
+    Loads data and PREPARES it by creating the 'TimePlot' and 'Voltage'
+    columns required by the downstream plotting functions.
+    """
     try:
         df = pd.read_csv(csv_f)
     except FileNotFoundError:
         return None
     df = df[df["Device"] == dev_filter].copy()
     if df.empty: return None
-    df["ADC_Value_V"] = df["ADC_Value"]  # Placeholder
+
+    # --- ADDED LOGIC TO CREATE THE REQUIRED COLUMNS ---
+    # Create 'Voltage' column using the provided conversion function
+    df["Voltage"] = settings.adc_to_v(df["ADC_Value"])
+
+    # Create 'TimePlot' column. Time should start from 0 for each run.
+    # 1. Get sample index per run: df.groupby('Run').cumcount()
+    # 2. Multiply by time per sample: * settings.SAMPLE_TIME_DELTA_US
+    # 3. Multiply by unit factor for plotting: * settings.ts_factor_for_raw_timeplot
+    time_per_sample = settings.SAMPLE_TIME_DELTA_US
+    time_unit_factor = settings.ts_factor_for_raw_timeplot
+    df['TimePlot'] = df.groupby('Run').cumcount() * time_per_sample * time_unit_factor
+
+    # Also add the old ADC_Value_V for compatibility with get_summary_data_main if needed
+    df["ADC_Value_V"] = df["Voltage"]
     df['DataSource'] = os.path.basename(csv_f)
+
     return df
 
 
@@ -151,7 +174,8 @@ def get_summary_data_main(df_single_file, max_runs_to_process, window_b, profile
     aligned_traces = []
     for run_id in runs_to_consider:
         run_data_group = df_single_file[df_single_file.Run == run_id].reset_index(drop=True)
-        voltages_this_run = run_data_group.ADC_Value_V.values
+        # Use the 'Voltage' column now for consistency
+        voltages_this_run = run_data_group.Voltage.values
         indices_above_thresh = np.where(voltages_this_run > threshold_val)[0]
 
         if not len(indices_above_thresh): continue
@@ -160,7 +184,6 @@ def get_summary_data_main(df_single_file, max_runs_to_process, window_b, profile
         segment_start_abs = onset_index_in_run - window_b
         segment_stop_abs = onset_index_in_run + max_window_a
 
-        # Belangrijke check: Zorgt ervoor dat het venster niet buiten de data valt
         if segment_start_abs >= 0 and segment_stop_abs <= len(voltages_this_run):
             segment = voltages_this_run[segment_start_abs:segment_stop_abs]
             if len(segment) > 0:
@@ -184,7 +207,7 @@ def calculate_trace_stats_main(aligned_traces):
 
 
 class PlotSettingsContainer:
-    """ NU AANGEPAST: Bevat de profielen dictionary """
+    """ NU AANGEPAST: Bevat de profielen dictionary en de missende attributen """
 
     def __init__(self):
         self.TARGET_DATA_SUBFOLDER = TARGET_DATA_SUBFOLDER
@@ -193,6 +216,7 @@ class PlotSettingsContainer:
         self.LABELS = LABELS
         self.DEVICE_FILTER = DEVICE_FILTER
         self.MAX_RUNS = MAX_RUNS
+        self.MAX_POINTS = MAX_POINTS
         self.WINDOW_BEFORE = WINDOW_BEFORE
         self.POST_PEAK_OFFSET_SAMPLES = POST_PEAK_OFFSET_SAMPLES
         self.FIT_WINDOW_POST_PEAK = FIT_WINDOW_POST_PEAK
@@ -201,18 +225,16 @@ class PlotSettingsContainer:
         self.TIME_UNIT = TIME_UNIT
         self.PLOT_COLORS = PLOT_COLORS
         self.PLOT_LINESTYLES = PLOT_LINESTYLES
-        self.ANALYSIS_PROFILES = ANALYSIS_PROFILES  # Voeg de profielen toe
+        self.ANALYSIS_PROFILES = ANALYSIS_PROFILES
+        self.adc_to_v = adc_to_v
 
-        self.PLOT_LINESTYLES = PLOT_LINESTYLES
-        self.ANALYSIS_PROFILES = ANALYSIS_PROFILES # Voeg de profielen toe
-
-        # --- VOEG DEZE LOGICA WEER TOE ---
         if self.TIME_UNIT.lower() == "s":
             self.ts_factor_for_raw_timeplot, self.tu_raw_lbl = 1e-6, "s"
         elif self.TIME_UNIT.lower() == "ms":
             self.ts_factor_for_raw_timeplot, self.tu_raw_lbl = 1e-3, "ms"
         else:
             self.ts_factor_for_raw_timeplot, self.tu_raw_lbl = 1.0, "µs"
+
 
 # --- Main script execution ---
 if __name__ == "__main__":
@@ -222,7 +244,8 @@ if __name__ == "__main__":
     dfs_loaded, actual_labels_used = [], []
     for i, filepath in enumerate(settings.CSV_FILES):
         if not os.path.exists(filepath): continue
-        df_loaded_single = load_and_prepare_data_main(filepath, settings.DEVICE_FILTER)
+        # <--- MODIFIED: Pass the settings object to the loading function
+        df_loaded_single = load_and_prepare_data_main(filepath, settings.DEVICE_FILTER, settings)
         if df_loaded_single is not None:
             dfs_loaded.append(df_loaded_single)
             actual_labels_used.append(settings.LABELS[i])
@@ -236,15 +259,13 @@ if __name__ == "__main__":
         label_current = actual_labels_used[i]
         filename_current = df_current_file['DataSource'].iloc[0]
 
-        # --- BELANGRIJKSTE WIJZIGING HIER ---
-        # Bepaal het profiel en haal de juiste instellingen op
         profile_key = get_profile_key_for_file(filename_current)
         current_profile_settings = settings.ANALYSIS_PROFILES[profile_key]
         print(f"  '{label_current}' uses '{profile_key}' profile.")
 
         matrix_list_current, runs_count_current = get_summary_data_main(
             df_current_file, settings.MAX_RUNS,
-            settings.WINDOW_BEFORE, current_profile_settings  # Geef het specifieke profiel door
+            settings.WINDOW_BEFORE, current_profile_settings
         )
         mean_trace, N_for_mean, _, std_trace = calculate_trace_stats_main(matrix_list_current)
 
@@ -252,7 +273,7 @@ if __name__ == "__main__":
             "matrix_list": matrix_list_current, "runs_count": runs_count_current,
             "mean_trace": mean_trace, "N_for_mean": N_for_mean,
             "std_trace": std_trace,
-            "profile_key": profile_key  # Sla het profiel op voor later gebruik!
+            "profile_key": profile_key
         }
         if N_for_mean > 0:
             print(f"    -> {N_for_mean} valid runs found and cached.")
@@ -268,8 +289,9 @@ if __name__ == "__main__":
         try:
             plot_module = importlib.import_module(module_name)
             plot_function = getattr(plot_module, function_name)
-            # De plot functies zelf moeten nu ook met de profielen om kunnen gaan
             result_fig = plot_function(dfs_loaded, actual_labels_used, settings, summary_cache, plt)
+            if result_fig is None:
+                print(f"I: Plot mode '{plot_mode_name_iter.upper()}' did not return a figure (this may be normal).")
         except Exception as e:
             print(f"E: An error occurred while running plot mode {plot_mode_name_iter.upper()}: {e}")
             import traceback;
