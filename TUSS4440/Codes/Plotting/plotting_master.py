@@ -15,20 +15,20 @@ NIEUW: Implementeert analyseprofielen om verschillende instellingen per materiaa
 
 # ---------------- PLOTMODUS – Select modes to run -----------------
 PLOT_MODES_TO_RUN = [
-    "RAW",
+    # "RAW",
     #"THRESHOLD",
-    # "SUMMARY",
+    #"SUMMARY",
     # "DIFFERENCE", # Nog niet geïmplementeerd als module
     # "DEVIATION_FROM_LINEAR", # Nog niet geïmplementeerd als module
     # "FFT_OF_DEVIATION", # Nog niet geïmplementeerd als module
-    # "POST_PEAK_PERIODOGRAM",
+    "POST_PEAK_PERIODOGRAM",
     # "INDIVIDUAL_RUN_PERIODOGRAM",
     # "PERIODOGRAM_ANALYSIS_STEPS",
     # "EXPLAIN_EXP_TREND"
     # "VARIABILITY_TABLE",          # Voeg deze toe voor de tabel
     # "PEAK_PROMINENCE",            # Voeg deze toe voor de bar chart
     # "RUN_CONSISTENCY_HEATMAP",    # Voeg deze toe voor de heatmaps
-    # "appendix_figures"
+    #"appendix_figures"
     # "PEAK_AMPLITUDE_BOXPLOT",
 ]
 
@@ -66,25 +66,27 @@ SAMPLE_TIME_DELTA_US = 4.63
 
 _CSV_BASE_FILES = [
     # Aluminium
-    "al_0mm_please_meta_3.csv", "al_0mm_please_meta_2.csv", "al_0mm_laatste_metingen_meta_1.csv", "al_0mm_laatste_metingen_meta_3.csv", "al_0mm_laatste_metingen_meta_4.csv",
-   "al_5mm_5_metingen_meta_1.csv", "al_5mm_5_metingen_meta_2.csv", "al_5mm_5_metingen_meta_3.csv", "al_5mm_5_metingen_meta_4.csv", "al_5mm_5_metingen_meta_5.csv",
-    "al_15mm_please_meta_1.csv", "al_15mm_please_meta_2.csv", "al_15mm_please_meta_3.csv", "al_15mm_please_meta_4.csv", "al_15mm_please_meta_5.csv",
+     #"al_0mm_please_meta_3.csv", "al_0mm_please_meta_2.csv", "al_0mm_laatste_metingen_meta_1.csv", "al_0mm_laatste_metingen_meta_3.csv", "al_0mm_laatste_metingen_meta_4.csv",
+    "al_5mm_5_metingen_meta_1.csv", "al_5mm_5_metingen_meta_2.csv", "al_5mm_5_metingen_meta_3.csv", "al_5mm_5_metingen_meta_4.csv", "al_5mm_5_metingen_meta_5.csv",
 
+    # "al_15mm_please_meta_1.csv", "al_15mm_please_meta_2.csv", "al_15mm_please_meta_3.csv", "al_15mm_please_meta_4.csv", #"al_15mm_please_meta_5.csv",
+    # "al_15mm_gleuf_teuf_meta_1.csv", "al_15mm_gleuf_teuf_meta_2.csv", "al_15mm_gleuf_teuf_meta_3.csv", "al_15mm_gleuf_teuf_meta_4.csv", #"al_15mm_klaar_mee_meta_1.csv",
+    # "al_15mm_ff_opnieuw_meta_1.csv", "al_15mm_ff_opnieuw_meta_2.csv", "al_15mm_ff_opnieuw_meta_3.csv", "al_15mm_ff_opnieuw_meta_4.csv",# "al_15mm_ff_opnieuw_meta_5.csv",
     # G10
-    "g10_0mm_3e_test_meta_1.csv", "g10_0mm_3e_test_meta_2.csv", "g10_0mm_3e_test_meta_3.csv", "g10_0mm_3e_test_meta_4.csv", "g10_0mm_3e_test_meta_5.csv",
-    "g10_5mm_final_meta_1.csv", "g10_5mm_5_metingen_meta_2.csv", "g10_5mm_5_metingen_meta_3.csv", "g10_5mm_5_metingen_meta_4.csv", "g10_5mm_5_metingen_meta_5.csv",
-    "g10_15mm_5_metingen_meta_1.csv", "g10_15mm_5_metingen_meta_2.csv", "g10_15mm_5_metingen_meta_3.csv", "g10_15mm_5_metingen_meta_4.csv", "g10_15mm_5_metingen_meta_5.csv"
+#     "g10_0mm_3e_test_meta_1.csv", "g10_0mm_3e_test_meta_2.csv", "g10_0mm_3e_test_meta_3.csv", "g10_0mm_3e_test_meta_4.csv", "g10_0mm_3e_test_meta_5.csv",
+#     "g10_5mm_final_meta_1.csv", "g10_5mm_5_metingen_meta_2.csv", "g10_5mm_5_metingen_meta_3.csv", "g10_5mm_5_metingen_meta_4.csv", "g10_5mm_5_metingen_meta_5.csv",
+#     "g10_15mm_5_metingen_meta_1.csv", "g10_15mm_5_metingen_meta_2.csv", "g10_15mm_5_metingen_meta_3.csv", "g10_15mm_5_metingen_meta_4.csv", "g10_15mm_5_metingen_meta_5.csv"
 ]
 LABELS = [
     # Aluminium
 
-    "AL Meting 1 (Defectloos)", "AL Meting 2 (Defectloos)", "AL Meting 3 (Defectloos)", "AL Meting 4 (Defectloos)","AL Meting 5 (Defectloos)",#, "AL Meting 6 (Defectloos)", "AL Meting 7 (Defectloos)", "AL meting 8 (defectloos)"
+    #"AL Meting 1 (Defectloos)", "AL Meting 2 (Defectloos)", "AL Meting 3 (Defectloos)", "AL Meting 4 (Defectloos)", "AL Meting 5 (Defectloos)",# "AL Meting 6 (Defectloos)", "AL Meting 7 (Defectloos)", "AL meting 8 (defectloos)" "AL Meting 9 (Defectloos)",
     "AL Meting 1 (5mm)", "AL Meting 2 (5mm)", "AL Meting 3 (5mm)", "AL Meting 4 (5mm)", "AL Meting 5 (5mm)",
-    "AL Meting 1 (15mm)", "AL Meting 2 (15mm)", "AL Meting 3 (15mm)", "AL Meting 4 (15mm)", "AL Meting 5 (15mm)",
+    # "AL Meting 1 (15mm)", "AL Meting 2 (15mm)", "AL Meting 3 (15mm)", "AL Meting 4 (15mm)", "AL Meting 5 (15mm)", "AL Meting 6 (15mm)", "AL Meting 7 (15mm)", "AL Meting 8 (15mm)", "AL Meting 9 (15mm)", "AL Meting 10 (15mm)", "AL Meting 11 (15mm)", "AL Meting 12 (15mm)", #"AL Meting 13 (15mm)", "AL Meting 14 (15mm)", "AL Meting 15 (15mm)",
     # G10
-   "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)", "G10 Meting 3 (Defectloos)", "G10 Meting 4 (Defectloos)", "G10 Meting 5 (Defectloos)",
-    "G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)", "G10 Meting 3 (5mm)", "G10 Meting 4 (5mm)", "G10 Meting 5 (5mm)",
-    "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)", "G10 Meting 3 (15mm)", "G10 Meting 4 (15mm)", "G10 Meting 5 (15mm)",
+   # "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)", "G10 Meting 3 (Defectloos)", "G10 Meting 4 (Defectloos)", "G10 Meting 5 (Defectloos)",
+   #  "G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)", "G10 Meting 3 (5mm)", "G10 Meting 4 (5mm)", "G10 Meting 5 (5mm)",
+   #  "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)", "G10 Meting 3 (15mm)", "G10 Meting 4 (15mm)", "G10 Meting 5 (15mm)",
 ]
 
 CSV_FILES = [os.path.join(TARGET_DATA_SUBFOLDER, fname.strip()) for fname in _CSV_BASE_FILES]
@@ -120,7 +122,7 @@ if THESIS_MODE:
         'figure.titlesize': 24
     })
 
-PLOT_COLORS = plt.get_cmap('Set1').colors
+PLOT_COLORS = plt.get_cmap('tab20c').colors
 PLOT_LINESTYLES = ['-']
 
 

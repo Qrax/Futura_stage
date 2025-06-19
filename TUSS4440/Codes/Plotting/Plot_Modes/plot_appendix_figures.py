@@ -56,14 +56,14 @@ def generate_plot_appendix_figures(dfs, act_lbls, settings, sum_cache, plt_insta
     # --- Plot 3: Gemiddelde en Spreidingsanalyse ---
     fig3, ax3 = plt_instance.subplots(figsize=(12, 8))
     time_axis_final = np.arange(-settings.WINDOW_BEFORE, len(mean_trace) - settings.WINDOW_BEFORE) * settings.SAMPLE_TIME_DELTA_US
-    ax3.plot(time_axis_final, mean_trace, color='black', lw=2.5, label=f'Gemiddelde (N={N})')
+    ax3.plot(time_axis_final, mean_trace, color='blue', lw=2.5, label=f'Gemiddelde (N={N})')
     if N > 1:
         tcrit = t.ppf(0.975, df=N - 1)
         sem = std_trace / np.sqrt(N)
         ci_margin = tcrit * sem
         pi_margin = tcrit * std_trace * np.sqrt(1 + 1 / N)
-        ax3.fill_between(time_axis_final, mean_trace - pi_margin, mean_trace + pi_margin, color='gray', alpha=0.3, label='95% Prediction Interval')
-        ax3.fill_between(time_axis_final, mean_trace - ci_margin, mean_trace + ci_margin, color='gray', alpha=0.6, label='95% Confidence Interval')
+        ax3.fill_between(time_axis_final, mean_trace - pi_margin, mean_trace + pi_margin, color='blue', alpha=0.3, label='95% Prediction Interval')
+        ax3.fill_between(time_axis_final, mean_trace - ci_margin, mean_trace + ci_margin, color='blue', alpha=0.6, label='95% Confidence Interval')
     ax3.set_title(f'Stap 3: Gemiddelde en Spreidingsanalyse\n({label_to_illustrate})')
     ax3.set_xlabel('Tijd relatief tot Trigger [µs]')
     ax3.set_ylabel('Voltage [ADC]')
