@@ -5,14 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fdba120e-fe28-44fa-9217-b155a0738d0b" name="Changes" comment="Changed plot stuff, idk what">
-      <change afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/Plot_Modes/plot_appendix_figures.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/plotting_master.py" beforeDir="false" afterPath="$PROJECT_DIR$/TUSS4440/Codes/Plotting/plotting_master.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -25,7 +28,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="visualise_sound" />
+        <entry key="$PROJECT_DIR$" value="Rework_Plotting_sessiosn" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -51,48 +54,48 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Python.Check_receiver.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Examening_Data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Pulse_Trough_PIN31_Both_Boards.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Receive_or_sent.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Receive_or_sent_2_boards.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Sending_pulse_or_receiving.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Test_Different_Pulses.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Test_Reset.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Test_using_code_instead_of_button.executor&quot;: &quot;Run&quot;,
-    &quot;Python.ToF.executor&quot;: &quot;Run&quot;,
-    &quot;Python.aluminiun_block_gleuf_simulation.executor&quot;: &quot;Run&quot;,
-    &quot;Python.aluminum_block_simulation.executor&quot;: &quot;Run&quot;,
-    &quot;Python.example_summary.executor&quot;: &quot;Run&quot;,
-    &quot;Python.huygens.executor&quot;: &quot;Run&quot;,
-    &quot;Python.meerdere_metingen.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_explain_exp_trend.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_individual_run_periodogram.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_periodogram_analysis_steps.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_summary.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plotting_master.executor&quot;: &quot;Run&quot;,
-    &quot;Python.read_DC_values.executor&quot;: &quot;Run&quot;,
-    &quot;Python.real_time_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.receive_data_on-off.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_pulse.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_snc.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tuss44x0-controller.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Rework__Plotting&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/q.koelman/PycharmProjects/TUSS4440/TUSS4440/Codes&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;PyScientificConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python.Check_receiver.executor": "Run",
+    "Python.Examening_Data.executor": "Run",
+    "Python.Pulse_Trough_PIN31_Both_Boards.executor": "Run",
+    "Python.Receive_or_sent.executor": "Run",
+    "Python.Receive_or_sent_2_boards.executor": "Run",
+    "Python.Sending_pulse_or_receiving.executor": "Run",
+    "Python.Test_Different_Pulses.executor": "Run",
+    "Python.Test_Reset.executor": "Run",
+    "Python.Test_using_code_instead_of_button.executor": "Run",
+    "Python.ToF.executor": "Run",
+    "Python.aluminiun_block_gleuf_simulation.executor": "Run",
+    "Python.aluminum_block_simulation.executor": "Run",
+    "Python.example_summary.executor": "Run",
+    "Python.huygens.executor": "Run",
+    "Python.meerdere_metingen.executor": "Run",
+    "Python.plot_explain_exp_trend.executor": "Run",
+    "Python.plot_individual_run_periodogram.executor": "Run",
+    "Python.plot_periodogram_analysis_steps.executor": "Run",
+    "Python.plot_summary.executor": "Run",
+    "Python.plotting_master.executor": "Run",
+    "Python.read_DC_values.executor": "Run",
+    "Python.real_time_data.executor": "Run",
+    "Python.receive_data_on-off.executor": "Run",
+    "Python.test_pulse.executor": "Run",
+    "Python.test_snc.executor": "Run",
+    "Python.tuss44x0-controller.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "plotting__scriptie",
+    "last_opened_file_path": "C:/Users/q.koelman/PycharmProjects/TUSS4440/TUSS4440/Codes",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "PyScientificConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\q.koelman\PycharmProjects\TUSS4440\TUSS4440\Codes" />
