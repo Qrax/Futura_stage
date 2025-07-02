@@ -30,9 +30,9 @@ END_MARKER = "E"
 PRINT_RAW_SERIAL_OUTPUT = False # Set to True to see all raw data from serial ports.
 
 # Nieuwe configuratie voor meta-runs
-NUM_META_RUNS = 2  # Aantal "grote" runs/blokken
-RUNS_PER_META = 50  # Aantal individuele metingen per meta-run
-INTER_META_RUN_DELAY_S = 15  # Pauze tussen meta-runs in seconden
+NUM_META_RUNS = 5  # Aantal "grote" runs/blokken
+RUNS_PER_META = 20  # Aantal individuele metingen per meta-run
+INTER_META_RUN_DELAY_S = 10  # Pauze tussen meta-runs in seconden
 INTER_RUN_DELAY = 2  # Pauze tussen individuele metingen binnen een meta-run (s)
 SAVE_INTERVAL = 10  # Aantal runs tussen tussentijdse CSV-saves (binnen een meta-run)
 

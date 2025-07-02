@@ -18,7 +18,7 @@ NIEUW: Implementeert analyseprofielen om verschillende instellingen per materiaa
 PLOT_MODES_TO_RUN = [
     # "RAW",
     # "THRESHOLD",
-    #"SUMMARY",
+    "SUMMARY",
     # "DIFFERENCE", # Nog niet geïmplementeerd als module
     # "DEVIATION_FROM_LINEAR", # Nog niet geïmplementeerd als module
     # "FFT_OF_DEVIATION", # Nog niet geïmplementeerd als module
@@ -34,7 +34,7 @@ PLOT_MODES_TO_RUN = [
     # "PEAK_AMPLITUDE_BOXPLOT",
     # "APPENDIX_PEAK_FINDING_EXPLAINED",
 #     "15MM_SCATTER",
-#     "SESSION_PERIODOGRAM",
+    "SESSION_PERIODOGRAM",
 #     "DIAGNOSTIC_PEAK_FINDING"
 ]
 
@@ -79,18 +79,18 @@ _CSV_BASE_FILES = [
    # "al_5mm_5_metingen_meta_1.csv", "al_5mm_5_metingen_meta_2.csv", "al_5mm_5_metingen_meta_3.csv", "al_5mm_5_metingen_meta_4.csv", "al_5mm_5_metingen_meta_5.csv",
 
     #Meting 1
-    # "al_15mm_please_meta_1.csv", "al_15mm_please_meta_2.csv", "al_15mm_please_meta_3.csv", "al_15mm_please_meta_4.csv","al_15mm_please_meta_5.csv",
+    "al_15mm_please_meta_1.csv", "al_15mm_please_meta_2.csv", "al_15mm_please_meta_3.csv", "al_15mm_please_meta_4.csv","al_15mm_please_meta_5.csv",
 
     #Meting 2
-    # "al_15mm_gleuf_teuf_meta_1.csv", "al_15mm_gleuf_teuf_meta_2.csv", "al_15mm_gleuf_teuf_meta_3.csv", "al_15mm_gleuf_teuf_meta_4.csv",
+    "al_15mm_gleuf_teuf_meta_1.csv", "al_15mm_gleuf_teuf_meta_2.csv", "al_15mm_gleuf_teuf_meta_3.csv", "al_15mm_gleuf_teuf_meta_4.csv",
 
     #Meting 3
-    # "al_15mm_ff_opnieuw_meta_1.csv", "al_15mm_ff_opnieuw_meta_2.csv", "al_15mm_ff_opnieuw_meta_3.csv", "al_15mm_ff_opnieuw_meta_4.csv", "al_15mm_ff_opnieuw_meta_5.csv",
+    "al_15mm_ff_opnieuw_meta_1.csv", "al_15mm_ff_opnieuw_meta_2.csv", "al_15mm_ff_opnieuw_meta_3.csv", "al_15mm_ff_opnieuw_meta_4.csv", "al_15mm_ff_opnieuw_meta_5.csv",
 
 
     # G10
     #     "g10_0mm_3e_test_meta_1.csv", "g10_0mm_3e_test_meta_2.csv", "g10_0mm_3e_test_meta_3.csv", "g10_0mm_3e_test_meta_4.csv", "g10_0mm_3e_test_meta_5.csv",
-        "g10_5mm_final_meta_1.csv", "g10_5mm_5_metingen_meta_2.csv", "g10_5mm_5_metingen_meta_3.csv", "g10_5mm_5_metingen_meta_4.csv", "g10_5mm_5_metingen_meta_5.csv",
+        #"g10_5mm_final_meta_1.csv", "g10_5mm_5_metingen_meta_2.csv", "g10_5mm_5_metingen_meta_3.csv", "g10_5mm_5_metingen_meta_4.csv", "g10_5mm_5_metingen_meta_5.csv",
         #"g10_15mm_5_metingen_meta_1.csv", "g10_15mm_5_metingen_meta_2.csv", "g10_15mm_5_metingen_meta_3.csv", "g10_15mm_5_metingen_meta_4.csv", "g10_15mm_5_metingen_meta_5.csv"
 ]
 
@@ -102,16 +102,16 @@ LABELS = [
    #  "AL Meting 1 (5mm)", "AL Meting 2 (5mm)", "AL Meting 3 (5mm)", "AL Meting 4 (5mm)", "AL Meting 5 (5mm)",
 
     # Sessie 1
-    # "AL 15mm (S1-M1)", "AL 15mm (S1-M2)", "AL 15mm (S1-M3)", "AL 15mm (S1-M4)", "AL 15mm (S1-M5)",
+    "AL 15mm (S1-M1)", "AL 15mm (S1-M2)", "AL 15mm (S1-M3)", "AL 15mm (S1-M4)", "AL 15mm (S1-M5)",
     # Sessie 2
-    # "AL 15mm (S2-M1)", "AL 15mm (S2-M2)", "AL 15mm (S2-M3)", "AL 15mm (S2-M4)",
+    "AL 15mm (S2-M1)", "AL 15mm (S2-M2)", "AL 15mm (S2-M3)", "AL 15mm (S2-M4)",
     # Sessie 3
-   # "AL 15mm (S3-M1)", "AL 15mm (S3-M2)", "AL 15mm (S3-M3)", "AL 15mm (S3-M4)", "AL 15mm (S3-M5)",
+   "AL 15mm (S3-M1)", "AL 15mm (S3-M2)", "AL 15mm (S3-M3)", "AL 15mm (S3-M4)", "AL 15mm (S3-M5)",
 
 
     # G10
    # "G10 Meting 1 (Defectloos)", "G10 Meting 2 (Defectloos)", "G10 Meting 3 (Defectloos)", "G10 Meting 4 (Defectloos)", "G10 Meting 5 (Defectloos)",
-    "G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)", "G10 Meting 3 (5mm)", "G10 Meting 4 (5mm)", "G10 Meting 5 (5mm)",
+    #"G10 Meting 1 (5mm)", "G10 Meting 2 (5mm)", "G10 Meting 3 (5mm)", "G10 Meting 4 (5mm)", "G10 Meting 5 (5mm)",
    # "G10 Meting 1 (15mm)", "G10 Meting 2 (15mm)", "G10 Meting 3 (15mm)", "G10 Meting 4 (15mm)", "G10 Meting 5 (15mm)",
 ]
 

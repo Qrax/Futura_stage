@@ -21,7 +21,7 @@ print("-" * 40)
 # --- Deel 2: Definieer Plot-venster en Simuleer Data ---
 
 # Uitgebreid tijdvenster
-time_window_before = 120
+time_window_before = 170
 time_window_after = 370
 start_time = steepest_rise_time - time_window_before
 end_time = steepest_rise_time + time_window_after
