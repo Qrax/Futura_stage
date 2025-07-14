@@ -1,78 +1,67 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+import os
+import numpy as np
 
-# --- CONFIGURATIE: CONTROLEER DEZE WAARDEN ---
+# --- Instellingen ---
+INPUT_FILE = 'data.txt'
+OUTPUT_FILENAME = 'signal_data.h'
+# Aantal samples om te gebruiken voor een soepele overgang van/naar het nulpunt
+PADDING_SAMPLES = 50
 
-# 1. De naam van jouw CSV-bestand
-CSV_FILE_PATH = 'data.txt'
+# --- Script ---
+print("--- TUSS Data Converter v3.0 (met Padding) ---")
 
-# 2. De naam van de kolom met de meetwaarden
-COLUMN_NAME = 'ADC_Value'
-
-# 3. Na het zien van de grafiek, vul hier de start- en eind-index in.
-#    Laat op 0 staan om eerst de grafiek te bekijken.
-START_INDEX = 0
-END_INDEX = 0
-
-# --- EINDE CONFIGURATIE ---
-
-
-# -------- SCRIPT START --------
-print("--- Puls Converter Script ---")
-# Laad de CSV-data
-try:
-    df = pd.read_csv(CSV_FILE_PATH)
-    print(f"'{CSV_FILE_PATH}' succesvol geladen met {len(df)} datapunten.")
-except FileNotFoundError:
-    print(f"FOUT: Kan het bestand '{CSV_FILE_PATH}' niet vinden. Zorg dat het in dezelfde map staat.")
+if not os.path.exists(INPUT_FILE):
+    print(f"\nFOUT: Inputbestand '{INPUT_FILE}' niet gevonden.")
     exit()
 
-if COLUMN_NAME not in df.columns:
-    print(f"FOUT: Kolom '{COLUMN_NAME}' niet gevonden. Beschikbare kolommen: {list(df.columns)}")
-    exit()
+print(f"Lezen van het bestand: {INPUT_FILE}...")
+df = pd.read_csv(INPUT_FILE)
+adc_values = df['ADC_Value'].tolist()
+avg_delay = round(df['Timestamp_us'].diff().mean())
 
-# Als de gebruiker nog geen range heeft gekozen, toon alleen de grafiek en stop
-if START_INDEX == 0 and END_INDEX == 0:
-    print("Grafiek van de volledige dataset wordt nu getoond...")
-    plt.figure(figsize=(15, 7))
-    plt.plot(df.index, df[COLUMN_NAME])
-    plt.title('Volledige Dataset - Zoek de start en het einde van je puls!')
-    plt.xlabel('Index (Sample Nummer)')
-    plt.ylabel('ADC Waarde')
-    plt.grid(True)
-    plt.tight_layout()
-    plt.show()
-    print("\nInstructie: Kijk op de grafiek en noteer de index-nummers.")
-    print("Pas daarna START_INDEX en END_INDEX aan in het script en draai het opnieuw.")
-    exit()
+min_adc = min(adc_values)
+max_adc = max(adc_values)
+adc_range = max_adc - min_adc
 
-# Selecteer het interessante deel van de data
-if END_INDEX <= START_INDEX:
-    print("FOUT: END_INDEX moet groter zijn dan START_INDEX.")
-    exit()
+if adc_range == 0:
+    scaled_values = [128] * len(adc_values)
+else:
+    scaled_values = [int(((val - min_adc) * 255) / adc_range) for val in adc_values]
 
-puls_data = df[COLUMN_NAME][START_INDEX:END_INDEX].values
-print(f"Puls geselecteerd van index {START_INDEX} tot {END_INDEX} ({len(puls_data)} samples).")
+# --- VOEG PADDING TOE ---
+NEUTRAL_VALUE = 128
+# Padding aan het begin: van 128 naar de eerste sample waarde
+start_padding = np.linspace(NEUTRAL_VALUE, scaled_values[0], PADDING_SAMPLES, dtype=int)
+# Padding aan het eind: van de laatste sample waarde naar 128
+end_padding = np.linspace(scaled_values[-1], NEUTRAL_VALUE, PADDING_SAMPLES, dtype=int)
 
-# Normaliseer de data naar 8-bit (0-255) voor de ESP32 DAC
-min_val = puls_data.min()
-max_val = puls_data.max()
+# Voeg alles samen tot het definitieve signaal
+final_signal = list(start_padding) + scaled_values + list(end_padding)
 
-# Cruciale check om delen door nul te voorkomen
-if max_val == min_val:
-    print("FOUT: Alle waarden in de selectie zijn hetzelfde. Kan niet normaliseren.")
-    exit()
+print(f"Signaal voorbereid: {PADDING_SAMPLES} padding, {len(scaled_values)} data, {PADDING_SAMPLES} padding.")
+print(f"Totaal aantal samples: {len(final_signal)}")
 
-# Centreer de data rond het midden (128) voor een betere AC-koppeling in de DRV2700
-# Dit is een geavanceerde stap die je signaal verbetert!
-normalized_data = [int(((x - min_val) / (max_val - min_val)) * 255) for x in puls_data]
+# --- Genereer het .h bestand ---
+# (De rest van het script is hetzelfde als voorheen, maar gebruikt 'final_signal')
+header_content = []
+header_content.append("#ifndef SIGNAL_DATA_H\n#define SIGNAL_DATA_H\n\n#include <pgmspace.h>\n")
+header_content.append(f"const int numSamples = {len(final_signal)};")
+header_content.append(f"const int SAMPLE_DELAY_US = {avg_delay};\n")
+header_content.append(f"const byte signalData[numSamples] PROGMEM = {{")
+line = "  "
+for i, val in enumerate(final_signal):
+    line += f"{val},"
+    if (i + 1) % 20 == 0:
+        header_content.append(line)
+        line = "  "
+    else:
+        line += " "
+if line.strip() != "":
+    header_content.append(line.strip().rstrip(','))
+header_content.append("};\n\n#endif // SIGNAL_DATA_H")
 
-# Genereer de C++ array code
-cpp_array = "const int numSamples = {};\n".format(len(normalized_data))
-cpp_array += "byte signalData[numSamples] = {"
-cpp_array += ", ".join(map(str, normalized_data))
-cpp_array += "};"
+with open(OUTPUT_FILENAME, 'w') as f:
+    f.write('\n'.join(header_content))
 
-print("\n--- ✅ SUCCES! KOPIEER DE VOLGENDE CODE NAAR JE ARDUINO SKETCH ---\n")
-print(cpp_array)
-print("\n--------------------------------------------------------------------\n")
+print(f"\nSUCCESS: Data met padding weggeschreven naar '{OUTPUT_FILENAME}'")
