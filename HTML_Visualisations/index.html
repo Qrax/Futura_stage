@@ -3,85 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Visualisaties</title>
+    <title>HTML Visualisaties - Futura Stage</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0d1117; color: #c9d1d9; line-height: 1.6; margin: 0; padding: 20px;
+            background-color: #0d1117; color: #c9d1d9; line-height: 1.6; margin: 0; padding: 0;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        header { text-align: center; margin-bottom: 40px; }
-        h1 { font-size: 2.5em; color: #58a6ff; }
-        p { color: #8b949e; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .navigation-header {
+            display: flex; align-items: center; margin-bottom: 20px;
+        }
+        .back-link {
+            color: #58a6ff; text-decoration: none; font-weight: bold; font-size: 1em;
+            display: inline-flex; align-items: center;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .back-link span { margin-left: 8px; }
+        .main-header { text-align: center; margin-bottom: 40px; }
+        .main-header h1 { font-size: 2.5em; color: #c9d1d9; margin: 0; }
+        .main-header p { color: #8b949e; font-size: 1.1em; }
         .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;
         }
         .card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            overflow: hidden;
-            text-decoration: none;
-            color: #c9d1d9;
-            display: block;
+            background-color: #161b22; border: 1px solid #30363d; border-radius: 8px;
+            overflow: hidden; text-decoration: none; color: #c9d1d9; display: block;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-        .card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover; /* Zorgt dat het plaatje de ruimte mooi vult */
-            display: block;
-            border-bottom: 1px solid #30363d;
-        }
-        .card-content {
-            padding: 20px;
-        }
-        .card-content h3 {
-            margin-top: 0;
-            color: #58a6ff;
-        }
-        .card-content p {
-            font-size: 0.9em;
-            color: #8b949e;
-        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); }
+        .card img { width: 100%; height: 180px; object-fit: cover; display: block; border-bottom: 1px solid #30363d; }
+        .card-content { padding: 20px; }
+        .card-content h3 { margin-top: 0; color: #58a6ff; }
+        .card-content p { font-size: 0.9em; color: #8b949e; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
+        <div class="navigation-header">
+            <!-- DEZE LINK GAAT EEN NIVEAU OMHOOG NAAR DE HOOFDPAGINA -->
+            <a href="../index.html" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span>Terug naar Project Hub</span>
+            </a>
+        </div>
+
+        <header class="main-header">
             <h1>Visualisatie Hub</h1>
             <p>Selecteer een van de onderstaande visualisaties om de interactieve simulatie te starten.</p>
         </header>
 
         <main>
             <div class="gallery-container">
-
-                <!-- KAART 1: DE SIMULATIE DIE JE AL HEBT -->
-                <a href="differential_sawtooth_simulation.html" class="card">
+                <a href="v_diff_visualisation.html" class="card">
                     <img src="images/sawtooth.png" alt="Preview of Sawtooth Wave Simulation">
                     <div class="card-content">
                         <h3>Differentiële Zaagtand Simulatie</h3>
                         <p>Een interactieve simulatie van twee differentiële zaagtand-signalen met instelbare fase, frequentie en amplitude.</p>
                     </div>
                 </a>
-
-                <!-- VOEG HIER EEN NIEUWE KAART TOE VOOR EEN VOLGENDE SIMULATIE -->
-                <!--
-                <a href="naam_van_andere_simulatie.html" class="card">
-                    <img src="images/preview_van_andere_simulatie.png" alt="Preview">
-                    <div class="card-content">
-                        <h3>Naam van Andere Simulatie</h3>
-                        <p>Een korte beschrijving van wat deze andere simulatie doet.</p>
-                    </div>
-                </a>
-                -->
-
+                <!-- Voeg hier meer kaarten toe voor toekomstige visualisaties -->
             </div>
         </main>
     </div>

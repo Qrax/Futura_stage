@@ -1,320 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Differential Oscilloscope</title>
+    <title>Differentiële Zaagtand Simulatie</title>
     <style>
+        /* Exact dezelfde styling als de hub-pagina voor een consistente look */
         body {
-            background-color: #1e1e1e;
-            color: #ecf0f1;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0d1117; color: #c9d1d9; line-height: 1.6; margin: 0; padding: 0;
         }
-        h1, h2 {
-            text-align: center;
-            color: #3498db;
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .navigation-header {
+            display: flex; align-items: center; margin-bottom: 20px;
         }
-        .main-container {
+        .back-link {
+            color: #58a6ff; text-decoration: none; font-weight: bold; font-size: 1em;
+            display: inline-flex; align-items: center;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .back-link span { margin-left: 8px; }
+        .main-header { text-align: left; margin-bottom: 30px; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
+        .main-header h1 { font-size: 2em; color: #c9d1d9; margin: 0; }
+        .main-header p { color: #8b949e; font-size: 1.1em; }
+
+        /* Specifieke styling voor de simulatie layout */
+        .simulation-container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
             gap: 20px;
         }
-        .canvas-section, .controls-section {
-            background-color: #2c3e50;
-            border: 2px solid #7f8c8d;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .canvas-container {
-            margin-bottom: 15px;
-        }
-        canvas {
-            display: block;
+        .canvas-section { flex: 3; min-width: 600px; }
+        .controls-section { flex: 2; min-width: 320px; background-color: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; }
+        .canvas-container { margin-bottom: 15px; }
+        canvas { display: block; width:100%; background-color: #000c1a;
             background-image:
                 linear-gradient(rgba(0, 255, 255, 0.15) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.15) 1px, transparent 1px),
-                linear-gradient(rgba(0, 255, 255, 0.4) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.4) 1px, transparent 1px);
-            background-size: 25px 25px, 25px 25px, 125px 125px, 125px 125px;
-            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
-            background-color: #000c1a;
+                linear-gradient(90deg, rgba(0, 255, 255, 0.15) 1px, transparent 1px);
+            background-size: 25px 25px;
         }
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 10px;
-            align-items: center;
-        }
-        label {
-            text-align: right;
-        }
-        input[type="range"] {
-            width: 100%;
-        }
-        .control-value {
-            min-width: 50px;
-            text-align: left;
-            font-weight: bold;
-            color: #f1c40f;
-        }
-        #phase-lock-btn {
-            grid-column: span 3;
-            padding: 10px;
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        #phase-lock-btn.locked {
-            background-color: #2ecc71;
-        }
+        .controls { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+        input[type="range"] { width: 100%; }
+        .control-value { font-weight: bold; color: #f1c40f; }
+        #phase-lock-btn { grid-column: span 3; padding: 10px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        #phase-lock-btn.locked { background-color: #2ecc71; }
     </style>
 </head>
 <body>
-
-    <h1>Interactive Differential Sawtooth Wave</h1>
-
-    <div class="main-container">
-        <div class="canvas-section">
-            <div class="canvas-container">
-                <h2>Vout+ Signal</h2>
-                <canvas id="canvas-pos" width="600" height="200"></canvas>
-            </div>
-            <div class="canvas-container">
-                <h2>Vout- Signal</h2>
-                <canvas id="canvas-neg" width="600" height="200"></canvas>
-            </div>
-            <div class="canvas-container">
-                <h2>Differential Signal (Vout+ - Vout-)</h2>
-                <canvas id="canvas-diff" width="600" height="200"></canvas>
-            </div>
+    <div class="container">
+        <div class="navigation-header">
+             <!-- DEZE LINK GAAT TERUG NAAR DE VISUALISATIE HUB -->
+            <a href="index.html" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span>Terug naar Visualisatie Hub</span>
+            </a>
         </div>
 
-        <div class="controls-section">
-            <h2>Controls</h2>
-            <h3>Vout+</h3>
-            <div class="controls" id="controls-pos">
-                <label for="amp-pos">Amplitude:</label>
-                <input type="range" id="amp-pos" min="0" max="80" value="40">
-                <span class="control-value" id="amp-pos-val">40</span>
+        <header class="main-header">
+            <h1>Differentiële Zaagtand Simulatie</h1>
+            <p>Experimenteer met de parameters om de individuele en resulterende signalen te beïnvloeden.</p>
+        </header>
 
-                <label for="freq-pos">Frequency:</label>
-                <input type="range" id="freq-pos" min="1" max="10" value="3">
-                <span class="control-value" id="freq-pos-val">3</span>
-
-                <label for="phase-pos">Phase:</label>
-                <input type="range" id="phase-pos" min="0" max="360" value="0">
-                <span class="control-value" id="phase-pos-val">0°</span>
-
-                <label for="offset-pos">DC Offset:</label>
-                <input type="range" id="offset-pos" min="-80" max="80" value="0">
-                <span class="control-value" id="offset-pos-val">0</span>
+        <main>
+            <div class="simulation-container">
+                <!-- HIER START DE ORIGINELE SIMULATIE-HTML -->
+                <div class="canvas-section">
+                    <div class="canvas-container"><h2>Vout+ Signal</h2><canvas id="canvas-pos" height="200"></canvas></div>
+                    <div class="canvas-container"><h2>Vout- Signal</h2><canvas id="canvas-neg" height="200"></canvas></div>
+                    <div class="canvas-container"><h2>Differential Signal (Vout+ - Vout-)</h2><canvas id="canvas-diff" height="200"></canvas></div>
+                </div>
+                <div class="controls-section">
+                    <h2>Controls</h2><h3>Vout+</h3>
+                    <div class="controls" id="controls-pos">
+                        <label for="amp-pos">Amplitude:</label><input type="range" id="amp-pos" min="0" max="80" value="40"><span class="control-value" id="amp-pos-val">40</span>
+                        <label for="freq-pos">Frequency:</label><input type="range" id="freq-pos" min="1" max="10" value="3"><span class="control-value" id="freq-pos-val">3</span>
+                        <label for="phase-pos">Phase:</label><input type="range" id="phase-pos" min="0" max="360" value="0"><span class="control-value" id="phase-pos-val">0°</span>
+                        <label for="offset-pos">DC Offset:</label><input type="range" id="offset-pos" min="-80" max="80" value="0"><span class="control-value" id="offset-pos-val">0</span>
+                    </div><hr><h3>Vout-</h3>
+                    <div class="controls" id="controls-neg">
+                        <label for="amp-neg">Amplitude:</label><input type="range" id="amp-neg" min="0" max="80" value="40"><span class="control-value" id="amp-neg-val">40</span>
+                        <label for="freq-neg">Frequency:</label><input type="range" id="freq-neg" min="1" max="10" value="3"><span class="control-value" id="freq-neg-val">3</span>
+                        <label for="phase-neg">Phase:</label><input type="range" id="phase-neg" min="0" max="360" value="180"><span class="control-value" id="phase-neg-val">180°</span>
+                        <label for="offset-neg">DC Offset:</label><input type="range" id="offset-neg" min="-80" max="80" value="0"><span class="control-value" id="offset-neg-val">0</span>
+                    </div><hr><button id="phase-lock-btn">Lock 180° Phase Difference</button>
+                </div>
+                 <!-- HIER EINDIGT DE ORIGINELE SIMULATIE-HTML -->
             </div>
-
-            <hr>
-
-            <h3>Vout-</h3>
-            <div class="controls" id="controls-neg">
-                 <label for="amp-neg">Amplitude:</label>
-                <input type="range" id="amp-neg" min="0" max="80" value="40">
-                <span class="control-value" id="amp-neg-val">40</span>
-
-                <label for="freq-neg">Frequency:</label>
-                <input type="range" id="freq-neg" min="1" max="10" value="3">
-                <span class="control-value" id="freq-neg-val">3</span>
-
-                <label for="phase-neg">Phase:</label>
-                <input type="range" id="phase-neg" min="0" max="360" value="180">
-                <span class="control-value" id="phase-neg-val">180°</span>
-
-                <label for="offset-neg">DC Offset:</label>
-                <input type="range" id="offset-neg" min="-80" max="80" value="0">
-                <span class="control-value" id="offset-neg-val">0</span>
-            </div>
-             <hr>
-            <button id="phase-lock-btn">Lock 180° Phase Difference</button>
-        </div>
+        </main>
     </div>
 
+    <!-- HET ORIGINELE JAVASCRIPT VOOR DE SIMULATIE -->
     <script>
-        const canvases = {
-            pos: document.getElementById('canvas-pos'),
-            neg: document.getElementById('canvas-neg'),
-            diff: document.getElementById('canvas-diff'),
-        };
-        const contexts = {
-            pos: canvases.pos.getContext('2d'),
-            neg: canvases.neg.getContext('2d'),
-            diff: canvases.diff.getContext('2d'),
-        };
-
-        const controls = {
-            pos: {
-                amp: document.getElementById('amp-pos'),
-                freq: document.getElementById('freq-pos'),
-                phase: document.getElementById('phase-pos'),
-                offset: document.getElementById('offset-pos'),
-            },
-            neg: {
-                amp: document.getElementById('amp-neg'),
-                freq: document.getElementById('freq-neg'),
-                phase: document.getElementById('phase-neg'),
-                offset: document.getElementById('offset-neg'),
-            }
-        };
-
-        const values = {
-            pos: {
-                amp: document.getElementById('amp-pos-val'),
-                freq: document.getElementById('freq-pos-val'),
-                phase: document.getElementById('phase-pos-val'),
-                offset: document.getElementById('offset-pos-val'),
-            },
-            neg: {
-                amp: document.getElementById('amp-neg-val'),
-                freq: document.getElementById('freq-neg-val'),
-                phase: document.getElementById('phase-neg-val'),
-                offset: document.getElementById('offset-neg-val'),
-            }
-        };
-
+        const canvases = { pos: document.getElementById('canvas-pos'), neg: document.getElementById('canvas-neg'), diff: document.getElementById('canvas-diff'), };
+        const contexts = { pos: canvases.pos.getContext('2d'), neg: canvases.neg.getContext('2d'), diff: canvases.diff.getContext('2d'), };
+        const controls = { pos: { amp: document.getElementById('amp-pos'), freq: document.getElementById('freq-pos'), phase: document.getElementById('phase-pos'), offset: document.getElementById('offset-pos'), }, neg: { amp: document.getElementById('amp-neg'), freq: document.getElementById('freq-neg'), phase: document.getElementById('phase-neg'), offset: document.getElementById('offset-neg'), } };
+        const values = { pos: { amp: document.getElementById('amp-pos-val'), freq: document.getElementById('freq-pos-val'), phase: document.getElementById('phase-pos-val'), offset: document.getElementById('offset-pos-val'), }, neg: { amp: document.getElementById('amp-neg-val'), freq: document.getElementById('freq-neg-val'), phase: document.getElementById('phase-neg-val'), offset: document.getElementById('offset-neg-val'), } };
         const phaseLockButton = document.getElementById('phase-lock-btn');
         let isPhaseLocked = false;
-        
-        // Function to generate a rising sawtooth value
-        function getSawtoothValue(x, width, freq, phaseDegrees) {
-            const phaseRad = phaseDegrees * Math.PI / 180;
-            const period = width / freq;
-            return ((x + (period * phaseRad / (2 * Math.PI))) % period) / period;
-        }
-        
-        function draw() {
-            // Update phase lock if active
-            if (isPhaseLocked) {
-                const phasePosValue = parseInt(controls.pos.phase.value);
-                const newPhaseNegValue = (phasePosValue + 180) % 360;
-                controls.neg.phase.value = newPhaseNegValue;
-                values.neg.phase.textContent = `${newPhaseNegValue}°`;
-            }
-
-            // Read all control values
-            const params = {
-                pos: {
-                    amp: parseInt(controls.pos.amp.value),
-                    freq: parseInt(controls.pos.freq.value),
-                    phase: parseInt(controls.pos.phase.value),
-                    offset: parseInt(controls.pos.offset.value),
-                },
-                neg: {
-                    amp: parseInt(controls.neg.amp.value),
-                    freq: parseInt(controls.neg.freq.value),
-                    phase: parseInt(controls.neg.phase.value),
-                    offset: parseInt(controls.neg.offset.value),
-                }
-            };
-            
-            // Clear all canvases
-            Object.values(contexts).forEach(ctx => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height));
-            
-            // Draw on each canvas
-            drawSignal('pos', params.pos);
-            drawSignal('neg', params.neg);
-            drawDifferential(params);
-        }
-
-        function drawSignal(key, p) {
-            const ctx = contexts[key];
-            const canvas = canvases[key];
-            const centerY = canvas.height / 2;
-            
-            ctx.strokeStyle = '#ffff00'; // Yellow signal
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            for (let x = 0; x < canvas.width; x++) {
-                const normalizedValue = getSawtoothValue(x, canvas.width, p.freq, p.phase);
-                // y = center - offset - (value * amplitude - half_amplitude)
-                const y = centerY - p.offset - (p.amp * (2 * normalizedValue - 1));
-
-                const prevNormalizedValue = getSawtoothValue(x - 1, canvas.width, p.freq, p.phase);
-                if (x > 0 && normalizedValue < prevNormalizedValue) {
-                    ctx.moveTo(x, y); // Jump on wrap-around
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.stroke();
-        }
-
-        function drawDifferential(p) {
-            const ctx = contexts.diff;
-            const canvas = canvases.diff;
-            const centerY = canvas.height / 2;
-
-            ctx.strokeStyle = '#00ff00'; // Green differential signal
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-
-            for (let x = 0; x < canvas.width; x++) {
-                const valPos = getSawtoothValue(x, canvas.width, p.pos.freq, p.pos.phase);
-                const yPos_volt = p.pos.offset + p.pos.amp * (2 * valPos - 1);
-
-                const valNeg = getSawtoothValue(x, canvas.width, p.neg.freq, p.neg.phase);
-                const yNeg_volt = p.neg.offset + p.neg.amp * (2 * valNeg - 1);
-                
-                const diffVolt = yPos_volt - yNeg_volt;
-                const y = centerY - diffVolt;
-                
-                const prevValPos = getSawtoothValue(x - 1, canvas.width, p.pos.freq, p.pos.phase);
-                const prevValNeg = getSawtoothValue(x - 1, canvas.width, p.neg.freq, p.neg.phase);
-                if (x > 0 && (valPos < prevValPos || valNeg < prevValNeg)) {
-                     ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.stroke();
-        }
-        
-        function setupEventListeners() {
-            document.querySelectorAll('input[type="range"]').forEach(input => {
-                input.addEventListener('input', () => {
-                    const [type, signal] = input.id.split('-');
-                    const unit = type === 'phase' ? '°' : '';
-                    values[signal][type].textContent = input.value + unit;
-                    draw();
-                });
-            });
-
-            phaseLockButton.addEventListener('click', () => {
-                isPhaseLocked = !isPhaseLocked;
-                controls.neg.phase.disabled = isPhaseLocked;
-                phaseLockButton.classList.toggle('locked', isPhaseLocked);
-                phaseLockButton.textContent = isPhaseLocked ? 'Unlock Phase' : 'Lock 180° Phase Difference';
-                draw();
-            });
-        }
-        
-        // Initial setup
+        function getSawtoothValue(x, width, freq, phaseDegrees) { const phaseRad = phaseDegrees * Math.PI / 180; const period = width / freq; return ((x + (period * phaseRad / (2 * Math.PI))) % period) / period; }
+        function draw() { if (isPhaseLocked) { const phasePosValue = parseInt(controls.pos.phase.value); const newPhaseNegValue = (phasePosValue + 180) % 360; controls.neg.phase.value = newPhaseNegValue; values.neg.phase.textContent = `${newPhaseNegValue}°`; } const params = { pos: { amp: parseInt(controls.pos.amp.value), freq: parseInt(controls.pos.freq.value), phase: parseInt(controls.pos.phase.value), offset: parseInt(controls.pos.offset.value), }, neg: { amp: parseInt(controls.neg.amp.value), freq: parseInt(controls.neg.freq.value), phase: parseInt(controls.neg.phase.value), offset: parseInt(controls.neg.offset.value), } }; Object.values(contexts).forEach(ctx => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)); drawSignal('pos', params.pos); drawSignal('neg', params.neg); drawDifferential(params); }
+        function drawSignal(key, p) { const ctx = contexts[key]; const canvas = canvases[key]; const centerY = canvas.height / 2; ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 2; ctx.beginPath(); for (let x = 0; x < canvas.width; x++) { const normalizedValue = getSawtoothValue(x, canvas.width, p.freq, p.phase); const y = centerY - p.offset - (p.amp * (2 * normalizedValue - 1)); const prevNormalizedValue = getSawtoothValue(x - 1, canvas.width, p.freq, p.phase); if (x > 0 && normalizedValue < prevNormalizedValue) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); } } ctx.stroke(); }
+        function drawDifferential(p) { const ctx = contexts.diff; const canvas = canvases.diff; const centerY = canvas.height / 2; ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 2; ctx.beginPath(); for (let x = 0; x < canvas.width; x++) { const valPos = getSawtoothValue(x, canvas.width, p.pos.freq, p.pos.phase); const yPos_volt = p.pos.offset + p.pos.amp * (2 * valPos - 1); const valNeg = getSawtoothValue(x, canvas.width, p.neg.freq, p.neg.phase); const yNeg_volt = p.neg.offset + p.neg.amp * (2 * valNeg - 1); const diffVolt = yPos_volt - yNeg_volt; const y = centerY - diffVolt; const prevValPos = getSawtoothValue(x - 1, canvas.width, p.pos.freq, p.pos.phase); const prevValNeg = getSawtoothValue(x - 1, canvas.width, p.neg.freq, p.neg.phase); if (x > 0 && (valPos < prevValPos || valNeg < prevValNeg)) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); } } ctx.stroke(); }
+        function setupEventListeners() { document.querySelectorAll('input[type="range"]').forEach(input => { input.addEventListener('input', () => { const [type, signal] = input.id.split('-'); const unit = type === 'phase' ? '°' : ''; values[signal][type].textContent = input.value + unit; draw(); }); }); phaseLockButton.addEventListener('click', () => { isPhaseLocked = !isPhaseLocked; controls.neg.phase.disabled = isPhaseLocked; phaseLockButton.classList.toggle('locked', isPhaseLocked); phaseLockButton.textContent = isPhaseLocked ? 'Unlock Phase' : 'Lock 180° Phase Difference'; draw(); }); }
         setupEventListeners();
-        // Trigger initial text content update
-        document.querySelectorAll('input[type="range"]').forEach(input => {
-             const [type, signal] = input.id.split('-');
-             const unit = type === 'phase' ? '°' : '';
-             values[signal][type].textContent = input.value + unit;
-        });
-        draw();
+        document.querySelectorAll('input[type="range"]').forEach(input => { const [type, signal] = input.id.split('-'); const unit = type === 'phase' ? '°' : ''; values[signal][type].textContent = input.value + unit; });
 
+        // Dynamic canvas sizing
+        function resizeCanvases() {
+            const container = document.querySelector('.canvas-section');
+            const width = container.clientWidth;
+            Object.values(canvases).forEach(c => c.width = width);
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases();
     </script>
-
 </body>
-</html>```
+</html>
