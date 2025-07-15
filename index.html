@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project: Futura Stage</title>
+    <style>
+        /* Simple, modern styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0d1117; /* GitHub Dark Background */
+            color: #c9d1d9; /* GitHub Dark Text */
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #58a6ff; /* GitHub Blue */
+            border-bottom: 2px solid #30363d; /* GitHub Border Color */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.1em;
+        }
+        .project-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .project-list li {
+            background-color: #161b22; /* GitHub Darker Item Background */
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .project-list li:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .project-list a {
+            display: block;
+            padding: 20px;
+            text-decoration: none;
+            color: #c9d1d9;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .project-list a small {
+            display: block;
+            font-weight: normal;
+            font-size: 0.8em;
+            color: #8b949e; /* GitHub Muted Text */
+            margin-top: 5px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #8b949e;
+        }
+        footer a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project: Futura Stage</h1>
+            <p>Welcome to the main hub for the Futura Stage project. Below you can find links to the various components, including code, documentation, and live demonstrations.</p>
+        </header>
+
+        <main>
+            <ul class="project-list">
+                <!-- LINK TO YOUR INTERACTIVE SIMULATION -->
+                <li>
+                    <a href="HTML-Visualisation/simulation.html">
+                        Interactive Oscilloscope Simulation
+                        <small>A live, interactive HTML/JavaScript simulation of the differential sawtooth waves.</small>
+                    </a>
+                </li>
+
+                <!-- ADD MORE LINKS TO OTHER PROJECT PARTS HERE -->
+                <!-- Example: Link to your Arduino code folder -->
+                <li>
+                    <a href="https://github.com/Qrax/Futura_stage/tree/master/Arduino_codes_stage">
+                        Arduino Source Code
+                        <small>The firmware running on the hardware. (Links to GitHub folder)</small>
+                    </a>
+                </li>
+
+                <!-- Example: Link to your Python code folder -->
+                <li>
+                    <a href="https://github.com/Qrax/Futura_stage/tree/master/Python_GUI_codes">
+                        Python GUI Source Code
+                        <small>The Python code for the graphical user interface. (Links to GitHub folder)</small>
+                    </a>
+                </li>
+            </ul>
+        </main>
+
+        <footer>
+            <p>Developed by Qrax | <a href="https://github.com/Qrax/Futura_stage">View on GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
