@@ -1,60 +1,84 @@
 #include <Arduino.h>
-#include "soc/rtc_io_reg.h"
-#include "soc/rtc_cntl_reg.h"
-#include "soc/sens_reg.h"
-#include "driver/dac.h"
+#include "driver/i2s.h"
+#include "driver/adc.h"
 
 // --- Configuratie ---
-// De frequentie die we willen benaderen.
-const int SINE_FREQUENCY_HZ = 40000;
+#define ADC_PIN           36
+#define ADC_CHANNEL       ADC1_CHANNEL_0 // GPIO 36 is ADC1_CH0
+#define I2S_PORT          I2S_NUM_0
 
-// Aantal golven dat we per keer willen uitzenden.
-const int WAVES_PER_BURST = 10;
+// De sample rate die we AANVRAGEN. De hardware zal proberen dit te benaderen.
+// Voor een 40kHz signaal is >80kS/s nodig. We proberen 100kS/s.
+#define TARGET_SAMPLE_RATE (400000) // 2MHz is de maximale sample rate die we kunnen vragen
 
-// De pauze tussen de bursts in milliseconden.
-const int PAUSE_DURATION_MS = 3000;
+// We lezen in chunks/blokken. 1024 is een efficiënte grootte.
+#define SAMPLES_PER_CHUNK  1024
+// We lezen meerdere chunks achter elkaar voor een nauwkeurige meting.
+#define NUM_CHUNKS         100 // Totaal = 1024 * 100 = 102.400 samples
 
-// Bereken de duur van de burst in microseconden.
-// Duur = (1 / frequentie) * aantal golven * 1.000.000 (om naar microseconden te gaan)
-const int BURST_DURATION_US = (1000000 / SINE_FREQUENCY_HZ) * WAVES_PER_BURST;
+// Buffer om ÉÉN chunk in op te slaan
+uint16_t i2s_read_buffer[SAMPLES_PER_CHUNK];
 
+
+void setup_adc_i2s() {
+  i2s_config_t i2s_config = {
+      .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN),
+      .sample_rate = TARGET_SAMPLE_RATE,
+      .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+      .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
+      .communication_format = I2S_COMM_FORMAT_STAND_I2S,
+      .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+      .dma_buf_count = 8,
+      .dma_buf_len = SAMPLES_PER_CHUNK, // DMA buffer even groot als onze chunk
+      .use_apll = false,
+      .tx_desc_auto_clear = false,
+      .fixed_mclk = 0
+  };
+
+  i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);
+  adc1_config_width(ADC_WIDTH_BIT_12);
+  adc1_config_channel_atten(ADC_CHANNEL, ADC_ATTEN_DB_11);
+  i2s_set_adc_mode(ADC_UNIT_1, ADC_CHANNEL);
+
+  Serial.println("ADC en I2S geconfigureerd.");
+  Serial.printf("Doel sample rate: %d S/s\n", TARGET_SAMPLE_RATE);
+  Serial.printf("Meting zal %d chunks van %d samples uitvoeren (totaal %d samples).\n\n", NUM_CHUNKS, SAMPLES_PER_CHUNK, NUM_CHUNKS * SAMPLES_PER_CHUNK);
+}
 
 void setup() {
-    // --- Configureer de Cosine Waveform (CW) generator ---
-    // Dit hoeft maar één keer te gebeuren. De hardware blijft de golf intern
-    // genereren, wij schakelen alleen de output naar de pin aan en uit.
-
-    // 1. Schakel de CW generator in.
-    SET_PERI_REG_MASK(SENS_SAR_DAC_CTRL1_REG, SENS_SW_TONE_EN);
-
-    // 2. Verbind de CW generator met DAC kanaal 1 (GPIO 25).
-    SET_PERI_REG_MASK(SENS_SAR_DAC_CTRL2_REG, SENS_DAC_CW_EN1_M);
-
-    // 3. Stel de frequentie in.
-    // Formule: freq_step = freq_hz * 65536 / 8_000_000
-    uint16_t frequency_step = (uint64_t)SINE_FREQUENCY_HZ * 65536 / 8000000;
-    SET_PERI_REG_BITS(SENS_SAR_DAC_CTRL1_REG, SENS_SW_FSTEP, frequency_step, SENS_SW_FSTEP_S);
-
-    // 4. Corrigeer de golfvorm-inversie (standaard is geïnverteerd). '2' (10b) corrigeert dit.
-    SET_PERI_REG_BITS(SENS_SAR_DAC_CTRL2_REG, SENS_DAC_INV1, 2, SENS_DAC_INV1_S);
-
-    // BELANGRIJK: Zorg ervoor dat de DAC-output standaard uit staat.
-    // We schakelen deze alleen in de loop in wanneer we een burst willen.
-    dac_output_disable(DAC_CHANNEL_1);
+  Serial.begin(115200);
+  delay(1000);
+  setup_adc_i2s();
 }
 
 void loop() {
-    // --- Genereer een burst van 10 golven ---
-    
-    // 1. Schakel de output op DAC pin 25 in.
-    dac_output_enable(DAC_CHANNEL_1);
+  Serial.println("--- Start nieuwe, nauwkeurige meting ---");
+  
+  size_t bytes_read;
+  long total_samples_measured = NUM_CHUNKS * SAMPLES_PER_CHUNK;
 
-    // 2. Wacht de berekende duur van de burst (250 microseconden).
-    delayMicroseconds(BURST_DURATION_US);
+  // Start de timer
+  long startTime = micros();
 
-    // 3. Schakel de output weer uit.
-    dac_output_disable(DAC_CHANNEL_1);
+  // Lees het gespecificeerde aantal chunks achter elkaar
+  for (int i = 0; i < NUM_CHUNKS; i++) {
+    esp_err_t result = i2s_read(I2S_PORT, &i2s_read_buffer, sizeof(i2s_read_buffer), &bytes_read, portMAX_DELAY);
+    if (result != ESP_OK) {
+        Serial.printf("Fout tijdens lezen van chunk %d: %s\n", i, esp_err_to_name(result));
+        return; // Stop de test bij een fout
+    }
+  }
 
-    // 4. Wacht 3 seconden tot de volgende burst.
-    delay(PAUSE_DURATION_MS);
+  // Stop de timer
+  long endTime = micros();
+
+  long duration = endTime - startTime;
+  float actual_sample_rate = (float)total_samples_measured / duration * 1000000.0f;
+
+  Serial.printf("Tijd om %ld samples te meten: %ld microseconden (%.2f seconden).\n", total_samples_measured, duration, duration / 1000000.0f);
+  Serial.printf("==> Werkelijke, gemeten sample rate: %.2f Samples/seconde\n", actual_sample_rate);
+  
+  // Wacht 3 seconden voor de volgende meting
+  Serial.println("\n--- Wachten voor 3 seconden... ---\n");
+  delay(3000);
 }
