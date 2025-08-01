@@ -72,32 +72,39 @@ print("Ontvangen Metadata:")
 for key, value in metadata.items():
     print(f"  - {key}: {value}")
 
+# --- DATA VERWERKING EN PLOTTEN ---
 if samples:
     num_samples = len(samples)
     
-    # Haal de rate uit de metadata, als deze bestaat
-    if 'RATE' in metadata:
-        actual_sample_rate = float(metadata['RATE'])
-        print(f"\nGebruik van de daadwerkelijk gemeten sample rate: {actual_sample_rate:.2f} S/s")
-    else:
-        actual_sample_rate = SAMPLE_RATE_HZ_EXPECTED
-        print(f"\nWAARSCHUWING: RATE niet gevonden in metadata. Gebruik van de verwachte waarde: {actual_sample_rate} S/s")
+    # Haal de rate uit de metadata
+    actual_sample_rate = float(metadata.get('RATE', SAMPLE_RATE_HZ_EXPECTED))
+    print(f"\nGebruik van de sample rate: {actual_sample_rate:.2f} S/s")
 
-    # Voorkom delen door nul als de rate 0 is
-    if actual_sample_rate == 0:
-        print("Fout: Sample rate is 0, kan geen tijd-as berekenen.")
-    else:
-        voltages_np = (np.array(samples) / MAX_ADC_VALUE) * MAX_VOLTAGE
-        time_axis_ms = np.arange(num_samples) / actual_sample_rate * 1000
+    # --- DE FINALE TWEE-PUNTS KALIBRATIE ---
+    # Dit zijn de waarden berekend op basis van jouw metingen.
+    ADC_GAIN = 0.00081641     # <-- JOUW BEREKENDE GAIN
+    ADC_OFFSET = 0.179        # <-- JOUW BEREKENDE OFFSET
+    
+    samples_np = np.array(samples)
+    # Pas de finale, gekalibreerde formule toe
+    voltages_np = (samples_np * ADC_GAIN) + ADC_OFFSET
+    
+    average_voltage = np.mean(voltages_np)
+    print(f"Gemiddelde GEKALIBREERDE spanning: {average_voltage:.3f} V")
 
-        plt.figure(figsize=(15, 7))
-        plt.plot(time_axis_ms, voltages_np)
-        plt.title(f"ESP32 ADC Meting\nBerekende Sample Rate: {actual_sample_rate/1000:.2f} kS/s")
-        plt.xlabel("Tijd (ms)")
-        plt.ylabel("Spanning (V)")
-        plt.grid(True)
-        plt.axhline(y=np.mean(voltages_np), color='r', linestyle='--', label=f'Gemiddeld: {np.mean(voltages_np):.3f} V')
-        plt.legend()
-        plt.show()
+    time_axis_ms = np.arange(num_samples) / actual_sample_rate * 1000
+
+    # --- PLOT MET HET FINALE VOLTAGE ---
+    plt.figure(figsize=(15, 7))
+    plt.plot(time_axis_ms, voltages_np)
+    plt.title(f"ESP32 ADC Meting - 2-Punts Gekalibreerd\nSample Rate: {actual_sample_rate/1000:.2f} kS/s")
+    plt.xlabel("Tijd (ms)")
+    plt.ylabel("Spanning (V)")
+    plt.grid(True)
+    # Zet een limiet op de y-as voor beter zicht
+    plt.ylim(min(voltages_np) - 0.1, max(voltages_np) + 0.1) 
+    plt.axhline(y=average_voltage, color='r', linestyle='--', label=f'Gemiddeld: {average_voltage:.3f} V')
+    plt.legend()
+    plt.show()
 else:
-    print("Geen samples ontvangen. Kan geen grafiek maken.")
+    print("Geen samples ontvangen.")
