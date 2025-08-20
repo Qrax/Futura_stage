@@ -1,0 +1,120 @@
+import serial
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import threading
+import queue
+import time
+
+# --- Configuratie ---
+# Pas dit aan naar de poort van jouw ESP32.
+SERIAL_PORT = 'COM10'  # <-- VERANDER DIT!
+BAUD_RATE = 2000000   # Moet overeenkomen met de ESP32 code
+
+# Een thread-veilige wachtrij om data tussen de threads te communiceren
+data_queue = queue.Queue()
+
+def read_serial_data(ser, data_queue, stop_event):
+    """
+    Deze functie draait in een aparte thread en leest continu de seriële poort.
+    """
+    print("Serial reader thread gestart.")
+    in_data_block = False
+    data_lines = []
+    
+    while not stop_event.is_set():
+        try:
+            # Wacht maximaal 1 seconde op een nieuwe regel
+            if ser.in_waiting > 0:
+                line = ser.readline().decode('utf-8', errors='ignore').strip()
+
+                if not line:
+                    continue
+
+                if line == "<DATA_START>":
+                    in_data_block = True
+                    data_lines = []
+                    continue
+
+                if line == "<DATA_END>":
+                    in_data_block = False
+                    full_data_str = "".join(data_lines)
+                    try:
+                        values = [int(v) for v in full_data_str.split(',') if v]
+                        # Plaats de complete dataset in de wachtrij
+                        data_queue.put(values)
+                    except (ValueError, IndexError):
+                        print("Fout: Kon data niet converteren.")
+                    continue
+
+                if in_data_block:
+                    data_lines.append(line)
+                else:
+                    # Print metadata direct
+                    print(f"ESP32 >> {line}")
+        except Exception as e:
+            print(f"Fout in serial reader thread: {e}")
+            break
+    print("Serial reader thread gestopt.")
+
+def update_plot(frame, ax):
+    """
+    Deze functie wordt periodiek aangeroepen door Matplotlib om de plot te updaten.
+    """
+    try:
+        # Haal de meest recente data uit de wachtrij, als die er is.
+        # De 'while' zorgt ervoor dat we eventuele oude data weggooien en alleen de nieuwste plotten.
+        values = None
+        while not data_queue.empty():
+            values = data_queue.get_nowait()
+
+        if values:
+            print(f"Plotting {len(values)} nieuwe datapunten...")
+            ax.clear()
+            ax.plot(values)
+            ax.set_title("Live ADC Meting van Transducer")
+            ax.set_xlabel("Sample Nummer")
+            ax.set_ylabel("Spanning (mV)")
+            ax.grid(True)
+            ax.set_ylim(0, 3300) # Max spanning is ~3.3V (3300 mV)
+
+    except queue.Empty:
+        # Dit is normaal, het betekent gewoon dat er geen nieuwe data was deze keer.
+        pass
+    except Exception as e:
+        print(f"Fout tijdens het updaten van de plot: {e}")
+
+def main():
+    """ Hoofdfunctie om alles op te zetten en te starten. """
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+        print(f"Verbonden met {SERIAL_PORT} op {BAUD_RATE} baud.")
+        time.sleep(2)
+    except serial.SerialException as e:
+        print(f"FATALE FOUT: Kon poort niet openen. {e}")
+        return
+
+    # Event om de achtergrond thread netjes te kunnen stoppen
+    stop_event = threading.Event()
+
+    # Start de data-lezer in een aparte thread
+    serial_thread = threading.Thread(target=read_serial_data, args=(ser, data_queue, stop_event))
+    serial_thread.daemon = True  # Zorgt ervoor dat de thread stopt als het hoofdprogramma stopt
+    serial_thread.start()
+
+    # Zet de plot op
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Maak de animatie. 'interval=200' betekent dat het probeert elke 200ms te updaten (5 FPS).
+    ani = animation.FuncAnimation(fig, update_plot, fargs=(ax,), interval=200, blit=False)
+    
+    # Toon de plot. Dit is een blokkerende aanroep die de GUI-loop start.
+    plt.show()
+
+    # Als de plot wordt gesloten, stopt het programma hier.
+    print("Plot venster gesloten. Programma wordt afgesloten.")
+    stop_event.set() # Signaal naar de thread dat hij moet stoppen
+    serial_thread.join() # Wacht tot de thread netjes is afgesloten
+    ser.close()
+
+if __name__ == '__main__':
+    main()
