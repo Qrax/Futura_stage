@@ -9,23 +9,25 @@
 
 
 // =================================================================
-// ==              MASTER CODE BLOCK                              ==
+// ==           MASTER CODE BLOCK (WITH DEBUG SIGNAL)             ==
 // =================================================================
 #ifdef ROLE_MASTER
 
-// --- ADC Configuration ---
-#define ADC_INPUT_PIN     ADC1_CHANNEL_6    // GPIO 34 for ADC input
+#define ADC_INPUT_PIN     ADC1_CHANNEL_6
 #define ADC_ATTENUATION   ADC_ATTEN_DB_12
 #define ADC_BIT_WIDTH     ADC_WIDTH_BIT_12
-
-// --- I2S ADC Configuration ---
 #define I2S_ADC_PORT      I2S_NUM_0
 #define I2S_SAMPLE_RATE   2000000
 #define I2S_DMA_BUF_LEN   1024
 
+// TUNE THIS VALUE: The delay to account for the speed of sound.
+#define LISTENING_DELAY_MICROSECONDS 100
+
+// NEW: A pin to visualize the ADC capture window on an oscilloscope
+#define MASTER_DEBUG_PIN 21
+
 uint16_t adc_capture_buffer[I2S_DMA_BUF_LEN];
 
-// Function Declarations for Master
 void setup_master_pins();
 void setup_i2s_adc();
 void trigger_and_measure();
@@ -41,7 +43,7 @@ void setup() {
 
 void loop() {
   if (Serial.available() > 0) {
-    while(Serial.available()) Serial.read(); // Clear the buffer
+    while(Serial.available()) Serial.read();
     trigger_and_measure();
   }
 }
@@ -50,6 +52,10 @@ void setup_master_pins() {
   pinMode(M2S_TRIGGER_PIN, OUTPUT);
   pinMode(S2M_READY_PIN, INPUT_PULLDOWN);
   digitalWrite(M2S_TRIGGER_PIN, LOW);
+  
+  // NEW: Setup the debug pin
+  pinMode(MASTER_DEBUG_PIN, OUTPUT);
+  digitalWrite(MASTER_DEBUG_PIN, LOW);
 }
 
 void setup_i2s_adc() {
@@ -68,25 +74,36 @@ void setup_i2s_adc() {
   adc1_config_width(ADC_BIT_WIDTH);
   adc1_config_channel_atten(ADC_INPUT_PIN, ADC_ATTENUATION);
   i2s_set_adc_mode(ADC_UNIT_1, ADC_INPUT_PIN);
-  i2s_adc_enable(I2S_ADC_PORT);
+  //i2s_adc_enable(I2S_ADC_PORT);
 }
 
 void trigger_and_measure() {
-  Serial.println("Master: Trigger received. Requesting pulse from slave...");
+  Serial.println("Master: Trigger received. Requesting pulse...");
   digitalWrite(M2S_TRIGGER_PIN, HIGH);
 
   unsigned long startTime = micros();
   while (digitalRead(S2M_READY_PIN) == LOW) {
-    if (micros() - startTime > 100000) { // 100ms timeout
+    if (micros() - startTime > 100000) {
       Serial.println("Master: ERROR - Timed out waiting for slave.");
       digitalWrite(M2S_TRIGGER_PIN, LOW);
       return;
     }
   }
+  
+  delayMicroseconds(LISTENING_DELAY_MICROSECONDS);
 
-  Serial.println("Master: Slave is ready! Capturing ADC data NOW.");
+  Serial.println("Master: Propagation delay finished. Capturing ADC...");
+  
+  // --- DEBUG SIGNAL GOES HIGH ---
+  digitalWrite(MASTER_DEBUG_PIN, HIGH);
+  
   size_t bytes_read = 0;
+  i2s_adc_enable(I2S_ADC_PORT);
   i2s_read(I2S_ADC_PORT, adc_capture_buffer, sizeof(adc_capture_buffer), &bytes_read, portMAX_DELAY);
+  i2s_adc_disable(I2S_ADC_PORT);
+  // --- DEBUG SIGNAL GOES LOW ---
+  digitalWrite(MASTER_DEBUG_PIN, LOW);
+  
   digitalWrite(M2S_TRIGGER_PIN, LOW);
 
   if (bytes_read > 0) {
@@ -99,40 +116,35 @@ void trigger_and_measure() {
   } else {
     Serial.println("Master: ERROR - No data read from ADC.");
   }
-  Serial.println("--- Cycle Complete. Ready for next trigger. ---");
+  Serial.println("--- Cycle Complete ---");
 }
 
 #endif // ROLE_MASTER
 
 
 // =================================================================
-// ==              SLAVE CODE BLOCK (FINAL VERSION)               ==
+// ==           SLAVE CODE BLOCK (STABLE & CORRECT)               ==
 // =================================================================
 #ifdef ROLE_SLAVE
 
-// --- I2S DAC Configuration ---
 #define I2S_DAC_PORT I2S_NUM_0
 
-// --- 40kHz Tone Configuration ---
 const int SINE_WAVE_FREQ_HZ = 40000;
 const int SAMPLES_PER_WAVE = 50;
 const int I2S_SAMPLE_RATE = SINE_WAVE_FREQ_HZ * SAMPLES_PER_WAVE;
 
-// --- Pulse Sequence Configuration (NO LEADER NEEDED ANYMORE) ---
 const int NUM_WAVES_IN_SEQUENCE = 10;
 const int PULSE_BUFFER_SAMPLES = SAMPLES_PER_WAVE * NUM_WAVES_IN_SEQUENCE;
-uint16_t pulse_buffer[PULSE_BUFFER_SAMPLES];
+const int PULSE_DURATION_MICROSECONDS = PULSE_BUFFER_SAMPLES * 1000000 / I2S_SAMPLE_RATE;
 
-// --- Buffer for continuous silence at the correct DC offset ---
+uint16_t pulse_buffer[PULSE_BUFFER_SAMPLES];
 const int SILENCE_BUFFER_SAMPLES = 128;
 uint16_t silence_buffer[SILENCE_BUFFER_SAMPLES];
-
 volatile bool sendPulseFlag = false;
 
-// Function Declarations for Slave
 void setup_slave_pins();
 void setup_i2s_dac();
-void generate_pulse_waveform(); // Back to the original name
+void generate_pulse_waveform();
 void fill_silence_buffer();
 void IRAM_ATTR handle_trigger_isr();
 
@@ -142,24 +154,22 @@ void setup() {
   Serial.println("--- Slave ESP32 Initialized ---");
   setup_slave_pins();
   setup_i2s_dac();
-  Serial.println("Generating waveform and silence buffer...");
   generate_pulse_waveform();
-  fill_silence_buffer(); // Prepare the silence buffer
-  Serial.println("Waveform ready. Waiting for trigger from master...");
+  fill_silence_buffer();
+  Serial.println("Waveform ready. Waiting for trigger...");
   attachInterrupt(digitalPinToInterrupt(M2S_TRIGGER_PIN), handle_trigger_isr, RISING);
 }
 
 void loop() {
   size_t bytes_written = 0;
   if (sendPulseFlag) {
-    // A trigger was received: send the pre-generated pulse
+    i2s_zero_dma_buffer(I2S_DAC_PORT);
     i2s_write(I2S_DAC_PORT, pulse_buffer, sizeof(pulse_buffer), &bytes_written, portMAX_DELAY);
+    delayMicroseconds(PULSE_DURATION_MICROSECONDS);
     sendPulseFlag = false;
-    digitalWrite(S2M_READY_PIN, LOW); // Signal that the pulse is done
+    digitalWrite(S2M_READY_PIN, LOW);
     Serial.println("Slave: Pulse sent.");
   } else {
-    // In the idle state, continuously send silence at the DC offset
-    // This keeps the DAC at ~1.65V, preventing any transients.
     i2s_write(I2S_DAC_PORT, silence_buffer, sizeof(silence_buffer), &bytes_written, portMAX_DELAY);
   }
 }
@@ -176,7 +186,7 @@ void IRAM_ATTR handle_trigger_isr() {
 }
 
 void fill_silence_buffer() {
-  uint16_t silence_value = 127 << 8; // The ~1.65V DC offset
+  uint16_t silence_value = 127 << 8;
   for (int i = 0; i < SILENCE_BUFFER_SAMPLES; i++) {
     silence_buffer[i] = silence_value;
   }
@@ -200,7 +210,6 @@ void setup_i2s_dac() {
   i2s_set_dac_mode(I2S_DAC_CHANNEL_LEFT_EN);
 }
 
-// This is the original pulse generation, WITHOUT the leader.
 void generate_pulse_waveform() {
   const float start_amplitude = 30.0f;
   const float end_amplitude = 95.0f;
