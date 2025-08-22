@@ -17,11 +17,11 @@
 #define ADC_ATTENUATION   ADC_ATTEN_DB_12
 #define ADC_BIT_WIDTH     ADC_WIDTH_BIT_12
 #define I2S_ADC_PORT      I2S_NUM_0
-#define I2S_SAMPLE_RATE   2000000
+#define I2S_SAMPLE_RATE   500000
 #define I2S_DMA_BUF_LEN   1024
 
 // TUNE THIS VALUE: The delay to account for the speed of sound.
-#define LISTENING_DELAY_MICROSECONDS 100
+#define LISTENING_DELAY_MICROSECONDS 60
 
 // NEW: A pin to visualize the ADC capture window on an oscilloscope
 #define MASTER_DEBUG_PIN 21
