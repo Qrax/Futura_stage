@@ -8,8 +8,12 @@ const int SINE_WAVE_FREQ_HZ = 40000;
 const int SAMPLES_PER_WAVE = 50;
 const int I2S_SAMPLE_RATE = SINE_WAVE_FREQ_HZ * SAMPLES_PER_WAVE;
 
-// Buffer for the active pulse (the sine wave)
-uint16_t pulse_buffer[SAMPLES_PER_WAVE];
+// --- Define the new, longer pulse sequence ---
+const int NUM_WAVES_IN_SEQUENCE = 10;
+const int PULSE_BUFFER_SAMPLES = SAMPLES_PER_WAVE * NUM_WAVES_IN_SEQUENCE; // 50 * 100 = 5000 samples
+
+// Buffer for the active pulse sequence. NOTE: This uses more memory (~10KB)
+uint16_t pulse_buffer[PULSE_BUFFER_SAMPLES];
 
 // A separate, smaller buffer for silence (idle state)
 const int SILENCE_BUFFER_SAMPLES = 64;
@@ -17,13 +21,13 @@ uint16_t silence_buffer[SILENCE_BUFFER_SAMPLES];
 
 // --- Mode Management ---
 enum OperatingMode {
-  PULSE_ON_COMMAND, // Default mode: send one pulse when triggered
-  CONTINUOUS_WAVE   // New mode: continuously send the 40kHz signal
+  PULSE_ON_COMMAND,
+  CONTINUOUS_WAVE
 };
 
 OperatingMode currentMode = CONTINUOUS_WAVE; // Start in the default mode
 
-// Flag to trigger the pulse in PULSE_ON_COMMAND mode. 'volatile' is good practice.
+// Flag to trigger the pulse in PULSE_ON_COMMAND mode.
 volatile bool triggerPulse = false;
 
 // --- Function Declarations ---
@@ -35,32 +39,31 @@ void runPulseMode();
 void runContinuousMode();
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(2000000);
   delay(1000);
 
   setup_i2s_dac_mode();
 
-  // Generate the waveforms once at the beginning
+  Serial.println("Generating complex waveform... please wait.");
   generate_pulse_waveform();
   fill_silence_buffer();
+  Serial.println("Waveform generation complete.");
   
   i2s_zero_dma_buffer(I2S_PORT);
 
   Serial.println("ESP32 is ready.");
   Serial.println("---------------------------------");
   Serial.println("Commands:");
-  Serial.println("  - Press [Enter] to send a single pulse (in mode A).");
+  Serial.println("  - Press [Enter] to send a single pulse sequence (in mode A).");
   Serial.println("  - Type 'mode_a' to switch to Pulse-on-Command mode.");
-  Serial.println("  - Type 'mode_b' to switch to Continuous 40kHz Wave mode.");
+  Serial.println("  - Type 'mode_b' to switch to Continuous Wave mode.");
   Serial.println("---------------------------------");
   Serial.print("Current mode: Pulse-on-Command (mode_a)\n");
 }
 
 void loop() {
-  // First, check for any incoming commands to change modes or trigger a pulse
   handleSerialCommands();
 
-  // Execute behavior based on the current mode
   switch (currentMode) {
     case PULSE_ON_COMMAND:
       runPulseMode();
@@ -72,29 +75,23 @@ void loop() {
   }
 }
 
-/**
- * @brief Checks for and processes commands from the Serial Monitor.
- */
 void handleSerialCommands() {
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n');
-    command.trim(); // Remove whitespace and newline characters
+    command.trim();
 
     if (command == "mode_a") {
       if (currentMode != PULSE_ON_COMMAND) {
         currentMode = PULSE_ON_COMMAND;
         Serial.println("Switched to Pulse-on-Command mode (mode_a). Press Enter for a pulse.");
-        // Clear the I2S buffer to ensure we start with silence
         i2s_zero_dma_buffer(I2S_PORT);
       }
     } else if (command == "mode_b") {
       if (currentMode != CONTINUOUS_WAVE) {
         currentMode = CONTINUOUS_WAVE;
-        Serial.println("Switched to Continuous Wave mode (mode_b). Generating 40kHz signal.");
+        Serial.println("Switched to Continuous Wave mode (mode_b).");
       }
     } else {
-      // If any other text (or just Enter) is received, treat it as a pulse trigger
-      // but only if we are in the correct mode.
       if (currentMode == PULSE_ON_COMMAND) {
         triggerPulse = true;
       }
@@ -102,31 +99,24 @@ void handleSerialCommands() {
   }
 }
 
-/**
- * @brief Logic for the PULSE_ON_COMMAND mode. Sends silence unless a pulse is triggered.
- */
 void runPulseMode() {
   size_t bytes_written = 0;
   if (triggerPulse) {
-    Serial.println("Pulse sent.");
+    Serial.println("Pulse sequence sent.");
+    // Write the entire 100-wave sequence to the DAC
     i2s_write(I2S_PORT, pulse_buffer, sizeof(pulse_buffer), &bytes_written, portMAX_DELAY);
-    triggerPulse = false; // Reset the flag immediately to send only one pulse
+    triggerPulse = false;
   } else {
-    // In the idle state, continuously send silence to maintain the 1.65V line
+    // In the idle state, continuously send silence
     i2s_write(I2S_PORT, silence_buffer, sizeof(silence_buffer), &bytes_written, portMAX_DELAY);
   }
 }
 
-/**
- * @brief Logic for the CONTINUOUS_WAVE mode. Constantly sends the sine wave.
- */
 void runContinuousMode() {
   size_t bytes_written = 0;
-  // Continuously write the sine wave buffer to the DAC
+  // Continuously loop the 100-wave sequence
   i2s_write(I2S_PORT, pulse_buffer, sizeof(pulse_buffer), &bytes_written, portMAX_DELAY);
 }
-
-// --- Helper Functions (Unchanged) ---
 
 void setup_i2s_dac_mode() {
   i2s_config_t i2s_config = {
@@ -147,19 +137,45 @@ void setup_i2s_dac_mode() {
   i2s_set_dac_mode(I2S_DAC_CHANNEL_LEFT_EN);
 }
 
-// Generates the sine wave data and stores it in the pulse_buffer
+// /-------------------------------------------------------------------\
+// |                        MODIFIED FUNCTION                          |
+// \-------------------------------------------------------------------/
+/**
+ * @brief Generates a 100-wave sequence where the amplitude sweeps
+ *        from 40 to 100 and back down.
+ */
 void generate_pulse_waveform() {
-  for (int i = 0; i < SAMPLES_PER_WAVE; i++) {
-    // Generate a 8-bit sine wave (0-255) centered at 127
-    // The DAC voltage is Vout = VDD * (dac_value / 255)
-    // Centering at 127 gives a DC offset of ~1.65V (VDD/2)
-    uint8_t dac_value = (uint8_t)(127.5 + 85 * sinf(2.0f * PI * i / SAMPLES_PER_WAVE));
-    // The I2S DAC on ESP32 uses the top 8 bits of a 16-bit sample
-    pulse_buffer[i] = dac_value << 8;
+  const float start_amplitude = 30.0f;
+  const float end_amplitude = 95.0f;
+
+  // Outer loop: iterate through each of the 100 waves
+  for (int wave_num = 0; wave_num < NUM_WAVES_IN_SEQUENCE; wave_num++) {
+    float current_amplitude;
+
+    // Determine the amplitude for the current wave
+    // It ramps up for the first half, and down for the second half
+    if (wave_num < NUM_WAVES_IN_SEQUENCE / 2) {
+      // Ramp up from start to end
+      float progress = (float)wave_num / ((NUM_WAVES_IN_SEQUENCE / 2) - 1);
+      current_amplitude = start_amplitude + (end_amplitude - start_amplitude) * progress;
+    } else {
+      // Ramp down from end to start
+      float progress = (float)(wave_num - NUM_WAVES_IN_SEQUENCE / 2) / ((NUM_WAVES_IN_SEQUENCE / 2) - 1);
+      current_amplitude = end_amplitude - (end_amplitude - start_amplitude) * progress;
+    }
+
+    // Inner loop: generate the 50 samples for the current wave
+    for (int i = 0; i < SAMPLES_PER_WAVE; i++) {
+      float sin_value = sinf(2.0f * PI * i / SAMPLES_PER_WAVE);
+      uint8_t dac_value = (uint8_t)(127.5f + current_amplitude * sin_value);
+
+      // Calculate the index in the master buffer
+      int buffer_index = wave_num * SAMPLES_PER_WAVE + i;
+      pulse_buffer[buffer_index] = dac_value << 8;
+    }
   }
 }
 
-// Fills the silence_buffer with the 1.65V idle value
 void fill_silence_buffer() {
   for (int i = 0; i < SILENCE_BUFFER_SAMPLES; i++) {
     silence_buffer[i] = 127 << 8;
