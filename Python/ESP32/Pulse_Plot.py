@@ -7,7 +7,7 @@ import time
 
 # --- Configuration (MUST MATCH ESP32 CODE) ---
 SERIAL_PORT = 'COM9'  # The COM port of your MASTER ESP32
-BAUD_RATE = 2000000
+BAUD_RATE = 921600
 SAMPLE_RATE = 500000  # 1 MHz sample rate
 NUM_SAMPLES = 1024     # The size of the ADC buffer
 
@@ -81,7 +81,7 @@ def update_plots(fig1, ax1, fig2, ax2, data):
     ax1.set_xlabel('Time (μs)')
     ax1.set_ylabel('ADC Value (0-4095)')
     ax1.grid(True)
-    ax1.set_ylim(1600, 1700) # Keep y-axis consistent
+    ax1.set_ylim(0, 4095) # Keep y-axis consistent
     fig1.tight_layout() # Adjust layout for the first figure
 
     # Plot 2: Frequency Domain (FFT) in the second figure
