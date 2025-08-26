@@ -13,12 +13,13 @@
 // =================================================================
 #ifdef ROLE_MASTER
 
-#define ADC_INPUT_PIN     ADC1_CHANNEL_6
+#define ADC_INPUT_PIN     ADC1_CHANNEL_0
 #define ADC_ATTENUATION   ADC_ATTEN_DB_12
 #define ADC_BIT_WIDTH     ADC_WIDTH_BIT_12
 #define I2S_ADC_PORT      I2S_NUM_0
-#define I2S_SAMPLE_RATE   500000
+#define I2S_SAMPLE_RATE   400000
 #define I2S_DMA_BUF_LEN   1024
+#define TOTAL_SAMPLES     1024
 
 // TUNE THIS VALUE: The delay to account for the speed of sound.
 #define LISTENING_DELAY_MICROSECONDS 60
@@ -33,7 +34,7 @@ void setup_i2s_adc();
 void trigger_and_measure();
 
 void setup() {
-  Serial.begin(2000000);
+  Serial.begin(921600);
   delay(1000);
   Serial.println("--- Master ESP32 Initialized ---");
   setup_master_pins();
@@ -65,14 +66,16 @@ void setup_i2s_adc() {
     .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
     .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-    .intr_alloc_flags = 0,
-    .dma_buf_count = 2,
+    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+    .dma_buf_count = 8,
     .dma_buf_len = I2S_DMA_BUF_LEN,
-    .use_apll = false
+    .use_apll = false,
+    .tx_desc_auto_clear = false,
+    .fixed_mclk = 0
   };
   i2s_driver_install(I2S_ADC_PORT, &i2s_config, 0, NULL);
   adc1_config_width(ADC_BIT_WIDTH);
-  adc1_config_channel_atten(ADC_INPUT_PIN, ADC_ATTENUATION);
+  adc1_config_channel_atten(ADC_INPUT_PIN, ADC_ATTEN_DB_12);
   i2s_set_adc_mode(ADC_UNIT_1, ADC_INPUT_PIN);
   //i2s_adc_enable(I2S_ADC_PORT);
 }
@@ -98,8 +101,21 @@ void trigger_and_measure() {
   digitalWrite(MASTER_DEBUG_PIN, HIGH);
   
   size_t bytes_read = 0;
+
+
+  i2s_zero_dma_buffer(I2S_ADC_PORT);
   i2s_adc_enable(I2S_ADC_PORT);
+
   i2s_read(I2S_ADC_PORT, adc_capture_buffer, sizeof(adc_capture_buffer), &bytes_read, portMAX_DELAY);
+  
+  while(bytes_read < TOTAL_SAMPLES * sizeof(uint16_t)) {
+    size_t bytes_read_now = 0;
+    i2s_read(I2S_ADC_PORT, ((uint8_t*)adc_capture_buffer) + bytes_read, sizeof(adc_capture_buffer) - bytes_read, &bytes_read_now, portMAX_DELAY);
+    if (bytes_read_now > 0) {
+      bytes_read += bytes_read_now;
+    }
+  }
+
   i2s_adc_disable(I2S_ADC_PORT);
   // --- DEBUG SIGNAL GOES LOW ---
   digitalWrite(MASTER_DEBUG_PIN, LOW);
@@ -109,7 +125,7 @@ void trigger_and_measure() {
   if (bytes_read > 0) {
     Serial.println("---BEGIN-DATA---");
     for (int i = 0; i < I2S_DMA_BUF_LEN; i++) {
-      uint16_t sample = adc_capture_buffer[i] >> 4;
+      uint16_t sample = adc_capture_buffer[i];// >> 4;
       Serial.println(sample);
     }
     Serial.println("---END-DATA---");
