@@ -79,9 +79,11 @@ def update_plots(fig1, ax1, fig2, ax2, data):
     ax1.plot(time_axis, data, color='b')
     ax1.set_title('Received Waveform')
     ax1.set_xlabel('Time (μs)')
-    ax1.set_ylabel('ADC Value (0-4095)')
+    # --- MODIFIED LINE ---
+    ax1.set_ylabel('Voltage (mV)')
     ax1.grid(True)
-    ax1.set_ylim(1600, 1700) # Keep y-axis consistent
+    # --- MODIFIED LINE (adjust this range as needed) ---
+    ax1.set_ylim(500, 2700)
     fig1.tight_layout() # Adjust layout for the first figure
 
     # Plot 2: Frequency Domain (FFT) in the second figure

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "driver/i2s.h"
+#include "esp_adc_cal.h"
 
 // =================================================================
 // ==              COMMON COMMUNICATION PINS                      ==
@@ -7,25 +8,30 @@
 #define M2S_TRIGGER_PIN 27 // Master-to-Slave: Request signal
 #define S2M_READY_PIN   33 // Slave-to-Master: Acknowledge/Ready signal
 
+// NEW: A pin to visualize the ADC capture window on an oscilloscope, and the delay before pulse at DAC
+#define DEBUG_PIN 21
 
 // =================================================================
 // ==           MASTER CODE BLOCK (WITH DEBUG SIGNAL)             ==
 // =================================================================
 #ifdef ROLE_MASTER
 
-#define ADC_INPUT_PIN     ADC1_CHANNEL_6
+#define ADC_INPUT_PIN     ADC1_CHANNEL_0
 #define ADC_ATTENUATION   ADC_ATTEN_DB_12
 #define ADC_BIT_WIDTH     ADC_WIDTH_BIT_12
 #define I2S_ADC_PORT      I2S_NUM_0
 #define I2S_SAMPLE_RATE   500000
 #define I2S_DMA_BUF_LEN   1024
+#define TOTAL_SAMPLES     1024
 
 // TUNE THIS VALUE: The delay to account for the speed of sound.
-#define LISTENING_DELAY_MICROSECONDS 60
+#define LISTENING_DELAY_MICROSECONDS 0
 
 // NEW: A pin to visualize the ADC capture window on an oscilloscope
-#define MASTER_DEBUG_PIN 21
+#define DEBUG_PIN 21
 
+
+esp_adc_cal_characteristics_t *adc_chars; 
 uint16_t adc_capture_buffer[I2S_DMA_BUF_LEN];
 
 void setup_master_pins();
@@ -54,8 +60,8 @@ void setup_master_pins() {
   digitalWrite(M2S_TRIGGER_PIN, LOW);
   
   // NEW: Setup the debug pin
-  pinMode(MASTER_DEBUG_PIN, OUTPUT);
-  digitalWrite(MASTER_DEBUG_PIN, LOW);
+  pinMode(DEBUG_PIN, OUTPUT);
+  digitalWrite(DEBUG_PIN, LOW);
 }
 
 void setup_i2s_adc() {
@@ -65,14 +71,21 @@ void setup_i2s_adc() {
     .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
     .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-    .intr_alloc_flags = 0,
-    .dma_buf_count = 2,
+    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+    .dma_buf_count = 8,
     .dma_buf_len = I2S_DMA_BUF_LEN,
-    .use_apll = false
+    .use_apll = false,
+    .tx_desc_auto_clear = false,
+    .fixed_mclk = 0
   };
+
   i2s_driver_install(I2S_ADC_PORT, &i2s_config, 0, NULL);
   adc1_config_width(ADC_BIT_WIDTH);
-  adc1_config_channel_atten(ADC_INPUT_PIN, ADC_ATTENUATION);
+  adc1_config_channel_atten(ADC_INPUT_PIN, ADC_ATTEN_DB_12);
+
+  adc_chars = (esp_adc_cal_characteristics_t *)calloc(1, sizeof(esp_adc_cal_characteristics_t));
+  esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTENUATION, ADC_BIT_WIDTH, 0, adc_chars);
+
   i2s_set_adc_mode(ADC_UNIT_1, ADC_INPUT_PIN);
   //i2s_adc_enable(I2S_ADC_PORT);
 }
@@ -95,22 +108,38 @@ void trigger_and_measure() {
   Serial.println("Master: Propagation delay finished. Capturing ADC...");
   
   // --- DEBUG SIGNAL GOES HIGH ---
-  digitalWrite(MASTER_DEBUG_PIN, HIGH);
+  digitalWrite(DEBUG_PIN, HIGH);
   
   size_t bytes_read = 0;
+
+
+  i2s_zero_dma_buffer(I2S_ADC_PORT);
   i2s_adc_enable(I2S_ADC_PORT);
+
   i2s_read(I2S_ADC_PORT, adc_capture_buffer, sizeof(adc_capture_buffer), &bytes_read, portMAX_DELAY);
+  
+  while(bytes_read < TOTAL_SAMPLES * sizeof(uint16_t)) {
+    size_t bytes_read_now = 0;
+    i2s_read(I2S_ADC_PORT, ((uint8_t*)adc_capture_buffer) + bytes_read, sizeof(adc_capture_buffer) - bytes_read, &bytes_read_now, portMAX_DELAY);
+    if (bytes_read_now > 0) {
+      bytes_read += bytes_read_now;
+    }
+  }
+
   i2s_adc_disable(I2S_ADC_PORT);
   // --- DEBUG SIGNAL GOES LOW ---
-  digitalWrite(MASTER_DEBUG_PIN, LOW);
+  digitalWrite(DEBUG_PIN, LOW);
   
   digitalWrite(M2S_TRIGGER_PIN, LOW);
 
   if (bytes_read > 0) {
     Serial.println("---BEGIN-DATA---");
     for (int i = 0; i < I2S_DMA_BUF_LEN; i++) {
-      uint16_t sample = adc_capture_buffer[i] >> 4;
-      Serial.println(sample);
+      // uint16_t sample = adc_capture_buffer[i];// >> 4;
+      // Serial.println(sample);
+
+      uint32_t voltage_mv = esp_adc_cal_raw_to_voltage(adc_capture_buffer[i], adc_chars);
+      Serial.println(voltage_mv);
     }
     Serial.println("---END-DATA---");
   } else {
@@ -163,6 +192,10 @@ void setup() {
 void loop() {
   size_t bytes_written = 0;
   if (sendPulseFlag) {
+    // Put the debug pin high during the delay
+    digitalWrite(DEBUG_PIN, HIGH);
+    delayMicroseconds(500);
+    digitalWrite(DEBUG_PIN, LOW);
     i2s_zero_dma_buffer(I2S_DAC_PORT);
     i2s_write(I2S_DAC_PORT, pulse_buffer, sizeof(pulse_buffer), &bytes_written, portMAX_DELAY);
     delayMicroseconds(PULSE_DURATION_MICROSECONDS);
