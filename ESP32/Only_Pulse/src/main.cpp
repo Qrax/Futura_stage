@@ -10,6 +10,8 @@
 
 // NEW: A pin to visualize the ADC capture window on an oscilloscope, and the delay before pulse at DAC
 #define DEBUG_PIN 21
+// NEW: A pin to visualize the ADC capture window on an oscilloscope, and the delay before pulse at DAC
+#define DEBUG_PIN 21
 
 // =================================================================
 // ==           MASTER CODE BLOCK (WITH DEBUG SIGNAL)             ==
@@ -17,14 +19,17 @@
 #ifdef ROLE_MASTER
 
 #define ADC_INPUT_PIN     ADC1_CHANNEL_0
+#define ADC_INPUT_PIN     ADC1_CHANNEL_0
 #define ADC_ATTENUATION   ADC_ATTEN_DB_12
 #define ADC_BIT_WIDTH     ADC_WIDTH_BIT_12
 #define I2S_ADC_PORT      I2S_NUM_0
 #define I2S_SAMPLE_RATE   500000
 #define I2S_DMA_BUF_LEN   1024
 #define TOTAL_SAMPLES     1024
+#define TOTAL_SAMPLES     1024
 
 // TUNE THIS VALUE: The delay to account for the speed of sound.
+#define LISTENING_DELAY_MICROSECONDS 0
 #define LISTENING_DELAY_MICROSECONDS 0
 
 // NEW: A pin to visualize the ADC capture window on an oscilloscope
@@ -39,7 +44,7 @@ void setup_i2s_adc();
 void trigger_and_measure();
 
 void setup() {
-  Serial.begin(2000000);
+  Serial.begin(921600);
   delay(1000);
   Serial.println("--- Master ESP32 Initialized ---");
   setup_master_pins();
@@ -62,6 +67,8 @@ void setup_master_pins() {
   // NEW: Setup the debug pin
   pinMode(DEBUG_PIN, OUTPUT);
   digitalWrite(DEBUG_PIN, LOW);
+  pinMode(DEBUG_PIN, OUTPUT);
+  digitalWrite(DEBUG_PIN, LOW);
 }
 
 void setup_i2s_adc() {
@@ -73,11 +80,17 @@ void setup_i2s_adc() {
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
     .dma_buf_count = 8,
+    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+    .dma_buf_count = 8,
     .dma_buf_len = I2S_DMA_BUF_LEN,
     .use_apll = false,
     .tx_desc_auto_clear = false,
     .fixed_mclk = 0
+    .use_apll = false,
+    .tx_desc_auto_clear = false,
+    .fixed_mclk = 0
   };
+
 
   i2s_driver_install(I2S_ADC_PORT, &i2s_config, 0, NULL);
   adc1_config_width(ADC_BIT_WIDTH);
@@ -109,12 +122,17 @@ void trigger_and_measure() {
   
   // --- DEBUG SIGNAL GOES HIGH ---
   digitalWrite(DEBUG_PIN, HIGH);
+  digitalWrite(DEBUG_PIN, HIGH);
   
   size_t bytes_read = 0;
 
 
   i2s_zero_dma_buffer(I2S_ADC_PORT);
+
+
+  i2s_zero_dma_buffer(I2S_ADC_PORT);
   i2s_adc_enable(I2S_ADC_PORT);
+
 
   i2s_read(I2S_ADC_PORT, adc_capture_buffer, sizeof(adc_capture_buffer), &bytes_read, portMAX_DELAY);
   
@@ -126,8 +144,18 @@ void trigger_and_measure() {
     }
   }
 
+  
+  while(bytes_read < TOTAL_SAMPLES * sizeof(uint16_t)) {
+    size_t bytes_read_now = 0;
+    i2s_read(I2S_ADC_PORT, ((uint8_t*)adc_capture_buffer) + bytes_read, sizeof(adc_capture_buffer) - bytes_read, &bytes_read_now, portMAX_DELAY);
+    if (bytes_read_now > 0) {
+      bytes_read += bytes_read_now;
+    }
+  }
+
   i2s_adc_disable(I2S_ADC_PORT);
   // --- DEBUG SIGNAL GOES LOW ---
+  digitalWrite(DEBUG_PIN, LOW);
   digitalWrite(DEBUG_PIN, LOW);
   
   digitalWrite(M2S_TRIGGER_PIN, LOW);
@@ -192,6 +220,10 @@ void setup() {
 void loop() {
   size_t bytes_written = 0;
   if (sendPulseFlag) {
+    // Put the debug pin high during the delay
+    digitalWrite(DEBUG_PIN, HIGH);
+    delayMicroseconds(500);
+    digitalWrite(DEBUG_PIN, LOW);
     // Put the debug pin high during the delay
     digitalWrite(DEBUG_PIN, HIGH);
     delayMicroseconds(500);

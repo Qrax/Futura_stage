@@ -7,7 +7,7 @@ import time
 
 # --- Configuration (MUST MATCH ESP32 CODE) ---
 SERIAL_PORT = 'COM9'  # The COM port of your MASTER ESP32
-BAUD_RATE = 2000000
+BAUD_RATE = 921600
 SAMPLE_RATE = 500000  # 1 MHz sample rate
 NUM_SAMPLES = 1024     # The size of the ADC buffer
 
